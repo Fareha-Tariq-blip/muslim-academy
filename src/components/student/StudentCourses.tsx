@@ -3,21 +3,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, BookOpen, FileText, PlusCircle } from 'lucide-react';
+import { Loader2, BookOpen, FileText, PlusCircle, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 
 const StudentCourses = () => {
   const { user } = useAuth();
   const [myCourses, setMyCourses] = useState<any[]>([]);
-  const [allCourses, setAllCourses] = useState<any[]>([]);
+  const [availableCourses, setAvailableCourses] = useState<any[]>([]);
   const [enrolledIds, setEnrolledIds] = useState<Set<string>>(new Set());
   const [studentId, setStudentId] = useState<string | null>(null);
+  const [studentClass, setStudentClass] = useState<string>('');
+  const [studentSection, setStudentSection] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState<string | null>(null);
-  const [selectedClass, setSelectedClass] = useState<string>('all');
-  const [selectedSection, setSelectedSection] = useState<string>('all');
 
   const fetchData = async () => {
     if (!user) return;
@@ -25,6 +25,8 @@ const StudentCourses = () => {
     const { data: s } = await supabase.from('students').select('id, class, section').eq('user_id', user.id).single();
     if (!s) { setLoading(false); return; }
     setStudentId(s.id);
+    setStudentClass(s.class);
+    setStudentSection(s.section);
 
     const { data: enrollments } = await supabase.from('enrollments').select('course_id').eq('student_id', s.id);
     const enrolledCourseIds = enrollments?.map(e => e.course_id) || [];
@@ -38,8 +40,10 @@ const StudentCourses = () => {
       setMyCourses([]);
     }
 
-    const { data: all } = await supabase.from('courses').select('*');
-    setAllCourses(all || []);
+    // Only fetch courses matching the student's class
+    const { data: all } = await supabase.from('courses').select('*').eq('class', s.class);
+    const filtered = (all || []).filter(c => !enrolledCourseIds.includes(c.id));
+    setAvailableCourses(filtered);
     setLoading(false);
   };
 
@@ -65,30 +69,17 @@ const StudentCourses = () => {
 
   if (loading) return <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
-  const availableCourses = allCourses.filter(c => !enrolledIds.has(c.id));
-
-  const filteredAvailable = availableCourses.filter(c => {
-    if (selectedClass !== 'all' && c.class !== selectedClass) return false;
-    if (selectedSection !== 'all' && c.section !== selectedSection) return false;
-    return true;
-  });
-
-  // Group by class for display
-  const groupedByClass: Record<string, any[]> = {};
-  filteredAvailable.forEach(c => {
-    const key = `Class ${c.class} - Section ${c.section}`;
-    if (!groupedByClass[key]) groupedByClass[key] = [];
-    groupedByClass[key].push(c);
-  });
-  const sortedGroups = Object.keys(groupedByClass).sort((a, b) => {
-    const classA = parseInt(a.match(/\d+/)?.[0] || '0');
-    const classB = parseInt(b.match(/\d+/)?.[0] || '0');
-    return classA - classB;
-  });
-
   return (
     <div className="space-y-6">
-      <h2 className="font-display text-2xl font-bold text-foreground">My Courses</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="font-display text-2xl font-bold text-foreground">My Courses</h2>
+        {studentClass && (
+          <Badge variant="secondary" className="text-sm px-3 py-1">
+            Class {studentClass} - Section {studentSection}
+          </Badge>
+        )}
+      </div>
+      
       <Tabs defaultValue="enrolled" className="w-full">
         <TabsList>
           <TabsTrigger value="enrolled">Enrolled ({myCourses.length})</TabsTrigger>
@@ -97,14 +88,14 @@ const StudentCourses = () => {
 
         <TabsContent value="enrolled" className="mt-4">
           {myCourses.length === 0 ? (
-            <Card><CardContent className="p-8 text-center text-muted-foreground">Not enrolled in any courses. Browse available courses to enroll!</CardContent></Card>
+            <Card className="border-dashed"><CardContent className="p-8 text-center text-muted-foreground">Not enrolled in any courses. Browse available courses to enroll!</CardContent></Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {myCourses.map(c => (
-                <Card key={c.id} className="hover:shadow-lg transition-shadow">
+                <Card key={c.id} className="hover:shadow-lg transition-all hover:border-primary/30">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10"><BookOpen className="h-5 w-5 text-primary" /></div>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10"><BookOpen className="h-5 w-5 text-primary" /></div>
                       <div>
                         <h3 className="font-semibold text-foreground">{c.name}</h3>
                         <p className="text-xs text-muted-foreground">Class {c.class} - Section {c.section}</p>
@@ -135,53 +126,36 @@ const StudentCourses = () => {
         </TabsContent>
 
         <TabsContent value="browse" className="mt-4 space-y-4">
-          <div className="flex gap-3 flex-wrap">
-            <Select value={selectedClass} onValueChange={setSelectedClass}>
-              <SelectTrigger className="w-[160px]"><SelectValue placeholder="Filter by class" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Classes</SelectItem>
-                {Array.from({ length: 12 }, (_, i) => (
-                  <SelectItem key={i + 1} value={String(i + 1)}>Class {i + 1}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedSection} onValueChange={setSelectedSection}>
-              <SelectTrigger className="w-[160px]"><SelectValue placeholder="Filter by section" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Sections</SelectItem>
-                {['A', 'B', 'C'].map(s => <SelectItem key={s} value={s}>Section {s}</SelectItem>)}
-              </SelectContent>
-            </Select>
+          <div className="flex items-center gap-2 rounded-lg bg-primary/5 border border-primary/20 p-3">
+            <Info className="h-4 w-4 text-primary flex-shrink-0" />
+            <p className="text-sm text-muted-foreground">
+              Showing courses for <span className="font-semibold text-foreground">Class {studentClass}</span> only
+            </p>
           </div>
 
-          {sortedGroups.length === 0 ? (
-            <Card><CardContent className="p-8 text-center text-muted-foreground">No courses available for the selected filters.</CardContent></Card>
+          {availableCourses.length === 0 ? (
+            <Card className="border-dashed"><CardContent className="p-8 text-center text-muted-foreground">No more courses available for your class.</CardContent></Card>
           ) : (
-            sortedGroups.map(group => (
-              <div key={group}>
-                <h3 className="font-semibold text-foreground mb-3 text-lg">{group}</h3>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
-                  {groupedByClass[group].map(c => (
-                    <Card key={c.id} className="hover:shadow-lg transition-shadow">
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted"><BookOpen className="h-5 w-5 text-muted-foreground" /></div>
-                          <div>
-                            <h3 className="font-semibold text-foreground">{c.name}</h3>
-                            <p className="text-xs text-muted-foreground">Class {c.class} - Section {c.section}</p>
-                          </div>
-                        </div>
-                        {c.description && <p className="text-sm text-muted-foreground mb-3">{c.description}</p>}
-                        <Button className="w-full mt-2" onClick={() => enrollInCourse(c.id)} disabled={enrolling === c.id}>
-                          {enrolling === c.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
-                          Enroll
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            ))
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {availableCourses.map(c => (
+                <Card key={c.id} className="hover:shadow-lg transition-all hover:border-primary/30">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted"><BookOpen className="h-5 w-5 text-muted-foreground" /></div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">{c.name}</h3>
+                        <p className="text-xs text-muted-foreground">Class {c.class} - Section {c.section}</p>
+                      </div>
+                    </div>
+                    {c.description && <p className="text-sm text-muted-foreground mb-3">{c.description}</p>}
+                    <Button className="w-full mt-2" onClick={() => enrollInCourse(c.id)} disabled={enrolling === c.id}>
+                      {enrolling === c.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
+                      Enroll
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
         </TabsContent>
       </Tabs>

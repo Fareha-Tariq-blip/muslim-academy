@@ -6,6 +6,7 @@ import QuizCreator from '@/components/teacher/QuizCreator';
 import AttendanceMarker from '@/components/teacher/AttendanceMarker';
 import CourseMaterialsManager from '@/components/teacher/CourseMaterialsManager';
 import StudentPerformance from '@/components/teacher/StudentPerformance';
+import GradeManager from '@/components/teacher/GradeManager';
 import StudentAnnouncements from '@/components/student/StudentAnnouncements';
 
 const TeacherDashboard = () => (
@@ -17,6 +18,7 @@ const TeacherDashboard = () => (
       <Route path="attendance" element={<AttendanceMarker />} />
       <Route path="materials" element={<CourseMaterialsManager />} />
       <Route path="performance" element={<StudentPerformance />} />
+      <Route path="grades" element={<GradeManager />} />
       <Route path="announcements" element={<StudentAnnouncements />} />
     </Routes>
   </DashboardLayout>

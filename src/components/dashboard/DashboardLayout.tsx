@@ -23,14 +23,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <div className="min-h-screen flex w-full">
         <DashboardSidebar />
         <div className="flex-1 flex flex-col">
-          <header className="h-14 flex items-center justify-between border-b bg-card px-4">
+          <header className="h-14 flex items-center justify-between border-b border-border/50 bg-card/80 backdrop-blur-sm px-4 sticky top-0 z-30">
             <div className="flex items-center gap-2">
               <SidebarTrigger />
               <span className="text-sm text-muted-foreground">
-                Welcome, <span className="font-medium text-foreground">{profile?.full_name || 'User'}</span>
+                Welcome, <span className="font-semibold text-foreground">{profile?.full_name || 'User'}</span>
               </span>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-destructive">
               <LogOut className="mr-2 h-4 w-4" /> Logout
             </Button>
           </header>
