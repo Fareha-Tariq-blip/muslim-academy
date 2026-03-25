@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Curriculum from "./pages/Curriculum";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
+import Community from "./pages/Community";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import TeacherDashboard from "./pages/dashboard/TeacherDashboard";
