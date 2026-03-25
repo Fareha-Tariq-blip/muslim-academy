@@ -27,6 +27,7 @@ const teacherItems = [
   { title: 'Overview', url: '/dashboard/teacher', icon: LayoutDashboard },
   { title: 'Assignments', url: '/dashboard/teacher/assignments', icon: ClipboardList },
   { title: 'Quizzes', url: '/dashboard/teacher/quizzes', icon: FileText },
+  { title: 'Grades', url: '/dashboard/teacher/grades', icon: BookMarked },
   { title: 'Attendance', url: '/dashboard/teacher/attendance', icon: Calendar },
   { title: 'Materials', url: '/dashboard/teacher/materials', icon: Upload },
   { title: 'Performance', url: '/dashboard/teacher/performance', icon: BarChart3 },

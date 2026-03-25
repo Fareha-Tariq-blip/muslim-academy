@@ -30,6 +30,7 @@ const App = () => (
             <Route path="/curriculum" element={<Curriculum />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/community" element={<Community />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard/admin/*" element={
               <ProtectedRoute allowedRoles={['admin']}>
