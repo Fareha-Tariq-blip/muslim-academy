@@ -28,8 +28,6 @@ const Login = () => {
     }
 
     toast.success('Welcome back!');
-    // Role-based redirect will happen via AuthContext
-    // Small delay to allow profile fetch
     setTimeout(async () => {
       const { supabase } = await import('@/integrations/supabase/client');
       const { data } = await supabase.from('profiles').select('role').eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '').single();
@@ -42,11 +40,11 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4">
+      <Card className="w-full max-w-md shadow-2xl border-border/50">
+        <CardHeader className="text-center pb-2">
           <Link to="/" className="mx-auto flex items-center gap-2 mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg">
               <BookOpen className="h-7 w-7 text-primary-foreground" />
             </div>
           </Link>
@@ -77,21 +75,21 @@ const Login = () => {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 shadow-md" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign In
             </Button>
           </form>
 
-          <div className="mt-6 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
-            <p className="font-semibold mb-1">Demo Accounts:</p>
+          <div className="mt-6 rounded-lg bg-muted/60 border border-border/50 p-3 text-xs text-muted-foreground">
+            <p className="font-semibold mb-1 text-foreground">Demo Accounts:</p>
             <p>Admin: admin@muslimacademy.com / admin123</p>
             <p>Teacher: teacher1@muslimacademy.com / teacher123</p>
             <p>Student: student1@muslimacademy.com / student123</p>
           </div>
 
           <div className="mt-4 text-center">
-            <Link to="/" className="text-sm text-primary hover:underline">← Back to Home</Link>
+            <Link to="/" className="text-sm text-primary hover:text-accent hover:underline transition-colors">← Back to Home</Link>
           </div>
         </CardContent>
       </Card>
