@@ -1,19 +1,19 @@
 import {
   LayoutDashboard, Users, GraduationCap, BookOpen, Bell,
   ClipboardList, FileText, Calendar, BarChart3, MessageSquare,
-  Upload, BookMarked, Image as ImageIcon, Mail, LogOut
+  Upload, BookMarked, Image as ImageIcon, Mail
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem,
+  SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { useNavigate } from 'react-router-dom';
+import logo from '@/assets/muslim-academy-logo.png';
 
 const adminItems = [
-  { title: 'Dashboard', url: '/dashboard/admin', icon: LayoutDashboard },
+  { title: 'Overview', url: '/dashboard/admin', icon: LayoutDashboard },
   { title: 'Students', url: '/dashboard/admin/students', icon: Users },
   { title: 'Teachers', url: '/dashboard/admin/teachers', icon: GraduationCap },
   { title: 'Courses', url: '/dashboard/admin/courses', icon: BookOpen },
@@ -24,7 +24,7 @@ const adminItems = [
 ];
 
 const teacherItems = [
-  { title: 'Dashboard', url: '/dashboard/teacher', icon: LayoutDashboard },
+  { title: 'Overview', url: '/dashboard/teacher', icon: LayoutDashboard },
   { title: 'Assignments', url: '/dashboard/teacher/assignments', icon: ClipboardList },
   { title: 'Quizzes', url: '/dashboard/teacher/quizzes', icon: FileText },
   { title: 'Grades', url: '/dashboard/teacher/grades', icon: BookMarked },
@@ -35,7 +35,7 @@ const teacherItems = [
 ];
 
 const studentItems = [
-  { title: 'Dashboard', url: '/dashboard/student', icon: LayoutDashboard },
+  { title: 'Overview', url: '/dashboard/student', icon: LayoutDashboard },
   { title: 'My Courses', url: '/dashboard/student/courses', icon: BookOpen },
   { title: 'Assignments', url: '/dashboard/student/assignments', icon: ClipboardList },
   { title: 'Quizzes', url: '/dashboard/student/quizzes', icon: FileText },
@@ -46,29 +46,29 @@ const studentItems = [
 ];
 
 const DashboardSidebar = () => {
-  const { role, signOut } = useAuth();
+  const { role } = useAuth();
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
-  const navigate = useNavigate();
 
   const items = role === 'admin' ? adminItems : role === 'teacher' ? teacherItems : studentItems;
   const label = role === 'admin' ? 'Admin Panel' : role === 'teacher' ? 'Teacher Portal' : 'Student Portal';
 
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/login');
-  };
-
   return (
     <Sidebar collapsible="icon">
-      <SidebarContent className="flex flex-col h-full">
+      <SidebarContent>
         {!collapsed && (
-          <div className="px-5 py-6 border-b border-sidebar-border">
-            <h2 className="font-display text-xl font-bold text-sidebar-foreground tracking-tight">Muslim Academy</h2>
-            <p className="text-xs text-sidebar-foreground/50 mt-0.5">{label}</p>
+          <div className="p-4 border-b border-sidebar-border">
+            <div className="flex items-center gap-2">
+              <img src={logo} alt="Muslim Academy" className="h-6 w-6 rounded-full" />
+              <div>
+                <p className="font-display text-sm font-bold text-sidebar-foreground">Muslim Academy</p>
+                <p className="text-[10px] text-sidebar-foreground/60">{label}</p>
+              </div>
+            </div>
           </div>
         )}
-        <SidebarGroup className="flex-1 pt-4">
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -77,10 +77,10 @@ const DashboardSidebar = () => {
                     <NavLink
                       to={item.url}
                       end
-                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-all hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
+                      className="hover:bg-sidebar-accent/50"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                     >
-                      <item.icon className="h-[18px] w-[18px] flex-shrink-0" />
+                      <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
@@ -89,18 +89,6 @@ const DashboardSidebar = () => {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {!collapsed && (
-          <div className="px-4 pb-5 mt-auto">
-            <button
-              onClick={handleLogout}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-400 transition-all hover:bg-red-500/10 hover:text-red-300"
-            >
-              <LogOut className="h-[18px] w-[18px]" />
-              <span>Logout</span>
-            </button>
-          </div>
-        )}
       </SidebarContent>
     </Sidebar>
   );
