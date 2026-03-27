@@ -10,7 +10,7 @@ const About = () => {
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-br from-card via-card to-secondary/5" id="about">
+    <section className="py-20 bg-gradient-to-br from-secondary/10 via-accent/5 to-primary/10" id="about">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">About Us</span>
