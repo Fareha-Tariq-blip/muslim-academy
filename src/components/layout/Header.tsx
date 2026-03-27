@@ -50,7 +50,7 @@ const Header = () => {
         </nav>
 
         <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
-          {mobileOpen ? <X className={`h-6 w-6 ${isScrolled ? 'text-foreground' : 'text-[hsl(40,30%,96%)]'}`} /> : <Menu className={`h-6 w-6 ${isScrolled ? 'text-foreground' : 'text-[hsl(40,30%,96%)]'}`} />}
+          {mobileOpen ? <X className="h-6 w-6 text-[hsl(40,30%,96%)]" /> : <Menu className="h-6 w-6 text-[hsl(40,30%,96%)]" />}
         </button>
       </div>
 
