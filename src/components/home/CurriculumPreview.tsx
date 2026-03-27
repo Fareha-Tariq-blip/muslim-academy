@@ -24,7 +24,7 @@ const subjects = [
 
 const CurriculumPreview = () => {
   return (
-    <section className="py-20 bg-gradient-to-b from-background via-primary/5 to-background" id="curriculum">
+    <section className="py-20 bg-gradient-to-b from-accent/10 via-secondary/5 to-primary/10" id="curriculum">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Our Subjects</span>
