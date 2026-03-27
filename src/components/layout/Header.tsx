@@ -29,8 +29,8 @@ const Header = () => {
         <Link to="/" className="flex items-center gap-2.5">
           <img src={logo} alt="Muslim Academy" className="h-10 w-10 rounded-full object-cover shadow-md" />
           <div>
-            <h1 className={`font-display text-lg font-bold leading-tight ${isScrolled ? 'text-foreground' : 'text-[hsl(40,30%,96%)]'}`}>Muslim Academy</h1>
-            <p className={`text-[10px] leading-none ${isScrolled ? 'text-muted-foreground' : 'text-[hsl(40,20%,80%)]'}`}>Excellence in Education</p>
+            <h1 className="font-display text-lg font-bold leading-tight text-[hsl(40,30%,96%)]">Muslim Academy</h1>
+            <p className="text-[10px] leading-none text-[hsl(40,20%,80%)]">Excellence in Education</p>
           </div>
         </Link>
 
