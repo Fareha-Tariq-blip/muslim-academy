@@ -39,7 +39,7 @@ const Header = () => {
             <Link
               key={link.to}
               to={link.to}
-              className={`rounded-md px-4 py-2 text-sm font-medium transition-all hover:bg-accent/15 ${location.pathname === link.to ? 'text-accent font-semibold bg-accent/10' : isScrolled ? 'text-foreground hover:text-accent' : 'text-[hsl(40,30%,96%)] hover:text-accent'}`}
+              className={`rounded-md px-4 py-2 text-sm font-medium transition-all hover:bg-accent/15 ${location.pathname === link.to ? 'text-accent font-semibold bg-accent/10' : 'text-[hsl(40,30%,96%)] hover:text-accent'}`}
             >
               {link.label}
             </Link>
