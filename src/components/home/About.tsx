@@ -41,9 +41,9 @@ const About = () => {
           {features.map((f, i) => (
             <div
               key={i}
-              className="group rounded-xl border bg-card p-6 text-center transition-all hover:shadow-lg hover:-translate-y-1 hover:border-primary/30"
+              className="group rounded-xl border border-accent/20 bg-gradient-to-br from-card to-accent/5 p-6 text-center transition-all hover:shadow-xl hover:-translate-y-1 hover:border-accent/40 hover:from-accent/10 hover:to-secondary/10"
             >
-              <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl ${f.color} transition-colors group-hover:bg-primary group-hover:text-primary-foreground`}>
+              <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent/15 text-accent transition-colors group-hover:bg-accent group-hover:text-accent-foreground`}>
                 <f.icon className="h-7 w-7" />
               </div>
               <h3 className="font-display text-lg font-semibold text-foreground">{f.title}</h3>
