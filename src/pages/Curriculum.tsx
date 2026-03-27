@@ -41,9 +41,9 @@ const Curriculum = () => {
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {subjects.map((s, i) => (
-              <div key={i} className="group rounded-xl border border-accent/20 bg-gradient-to-br from-card to-accent/5 p-6 transition-all hover:shadow-xl hover:border-accent/40 hover:from-accent/10 hover:to-secondary/10">
+              <div key={i} className="group rounded-xl border border-accent/30 bg-accent/10 p-6 transition-all hover:shadow-xl hover:bg-accent/20">
                 <div className="flex items-center gap-4 mb-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/15 text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-accent-foreground transition-transform group-hover:scale-110">
                     <s.icon className="h-6 w-6" />
                   </div>
                   <h3 className="font-display text-lg font-semibold text-foreground">{s.name}</h3>
