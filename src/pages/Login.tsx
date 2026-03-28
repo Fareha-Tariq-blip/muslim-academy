@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import campusImg from '@/assets/academy-campus.jpg';
+import { supabase } from '@/integrations/supabase/client';
 
 const stats = [
   { icon: Clock, value: '15+', label: 'Years of Experience' },
@@ -29,23 +30,23 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     const { error } = await signIn(email, password);
-    setLoading(false);
-
     if (error) {
       toast.error(error.message || 'Login failed');
+      setLoading(false);
       return;
     }
 
     toast.success('Welcome back!');
-    setTimeout(async () => {
-      const { supabase } = await import('@/integrations/supabase/client');
-      const { data } = await supabase.from('profiles').select('role').eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '').single();
-      if (data?.role) {
-        navigate(`/dashboard/${data.role}`);
-      } else {
-        navigate('/dashboard/student');
-      }
-    }, 500);
+    // Fetch role directly and navigate
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data } = await supabase.from('profiles').select('role').eq('user_id', user.id).single();
+      const role = data?.role || 'student';
+      navigate(`/dashboard/${role}`, { replace: true });
+    } else {
+      navigate('/dashboard/student', { replace: true });
+    }
+    setLoading(false);
   };
 
   return (
@@ -53,10 +54,8 @@ const Login = () => {
       <Header />
 
       <main className="flex-1 pt-20">
-        {/* Two-column login section */}
         <div className="container mx-auto px-4 py-12">
           <div className="grid gap-10 lg:grid-cols-2 items-start">
-
             {/* Left: Login Form */}
             <div className="flex flex-col justify-center">
               <div className="mb-8">
@@ -87,7 +86,7 @@ const Login = () => {
                       <Input
                         id="email"
                         type="email"
-                        placeholder="your@email.com"
+                        placeholder="your@muslimacademy.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
@@ -125,35 +124,20 @@ const Login = () => {
             {/* Right: Academy image + info */}
             <div className="space-y-6">
               <div className="rounded-2xl overflow-hidden shadow-xl border border-border/30">
-                <img
-                  src={campusImg}
-                  alt="Muslim Academy Campus"
-                  className="w-full h-64 md:h-80 object-cover"
-                  loading="lazy"
-                  width={960}
-                  height={1080}
-                />
+                <img src={campusImg} alt="Muslim Academy Campus" className="w-full h-64 md:h-80 object-cover" loading="lazy" width={960} height={1080} />
               </div>
 
               <div className="rounded-xl bg-accent/10 border border-accent/30 p-6">
-                <h3 className="font-display text-xl font-bold text-foreground mb-1">
-                  Muslim Girls High School & College
-                </h3>
-                <p className="text-sm text-primary font-semibold mb-2">
-                  Affiliated with BISE Lahore
-                </p>
+                <h3 className="font-display text-xl font-bold text-foreground mb-1">Muslim Girls High School & College</h3>
+                <p className="text-sm text-primary font-semibold mb-2">Affiliated with BISE Lahore</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Empowering young minds with quality education rooted in Islamic values since 2008. Building confident, knowledgeable leaders for tomorrow.
                 </p>
               </div>
 
-              {/* Stats */}
               <div className="grid grid-cols-2 gap-4">
                 {stats.map((stat, i) => (
-                  <div
-                    key={i}
-                    className="rounded-xl bg-primary/10 border border-primary/20 p-4 text-center transition-all hover:shadow-md hover:bg-primary/15"
-                  >
+                  <div key={i} className="rounded-xl bg-primary/10 border border-primary/20 p-4 text-center transition-all hover:shadow-md hover:bg-primary/15">
                     <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                       <stat.icon className="h-5 w-5" />
                     </div>

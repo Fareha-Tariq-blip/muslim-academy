@@ -7,8 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, Pencil, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Pencil, Loader2, Search } from 'lucide-react';
 import { toast } from 'sonner';
+import { validateAcademyEmail, validatePassword } from '@/lib/validation';
 
 const StudentManagement = () => {
   const [students, setStudents] = useState<any[]>([]);
@@ -16,8 +17,11 @@ const StudentManagement = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ full_name: '', email: '', password: 'student123', roll_number: '', class: '1', section: 'A', guardian_name: '', phone: '' });
+  const [search, setSearch] = useState('');
+  const [filterClass, setFilterClass] = useState('all');
+  const [form, setForm] = useState({ full_name: '', email: '', password: '', roll_number: '', class: '1', section: 'A', guardian_name: '', phone: '' });
   const [editForm, setEditForm] = useState({ id: '', roll_number: '', class: '1', section: 'A', guardian_name: '', phone: '', full_name: '', profile_id: '' });
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -36,6 +40,11 @@ const StudentManagement = () => {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    const emailErr = validateAcademyEmail(form.email);
+    if (emailErr) { toast.error(emailErr); return; }
+    const pwdErrs = validatePassword(form.password);
+    if (pwdErrs.length) { setPasswordErrors(pwdErrs); return; }
+
     setSaving(true);
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData.session?.access_token;
@@ -55,7 +64,8 @@ const StudentManagement = () => {
     else {
       toast.success('Student registered successfully');
       setDialogOpen(false);
-      setForm({ full_name: '', email: '', password: 'student123', roll_number: '', class: '1', section: 'A', guardian_name: '', phone: '' });
+      setForm({ full_name: '', email: '', password: '', roll_number: '', class: '1', section: 'A', guardian_name: '', phone: '' });
+      setPasswordErrors([]);
       fetchStudents();
     }
     setSaving(false);
@@ -87,25 +97,33 @@ const StudentManagement = () => {
 
   const handleDelete = async (student: any) => {
     if (!confirm('Delete this student? This will also remove their login account.')) return;
-    // Delete from students table first
-    await supabase.from('students').delete().eq('id', student.id);
-    // Delete from profiles
-    await supabase.from('profiles').delete().eq('user_id', student.user_id);
-    // Delete from auth.users via edge function
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData.session?.access_token;
-    await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-user`, {
+    // Delete from auth first (cascades profiles via trigger, and we clean up students)
+    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-user`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ action: 'delete', user_id: student.user_id }),
     });
+    const result = await res.json();
+    if (result.error) { toast.error(result.error); return; }
+    // Clean up students and profiles tables
+    await supabase.from('students').delete().eq('id', student.id);
+    await supabase.from('profiles').delete().eq('user_id', student.user_id);
     toast.success('Student deleted completely');
     fetchStudents();
   };
 
+  const filtered = students.filter(s => {
+    const matchesSearch = (s.profile?.full_name || '').toLowerCase().includes(search.toLowerCase()) ||
+      s.roll_number.toLowerCase().includes(search.toLowerCase());
+    const matchesClass = filterClass === 'all' || s.class === filterClass;
+    return matchesSearch && matchesClass;
+  });
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <h2 className="font-display text-2xl font-bold text-foreground">Student Management</h2>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" /> Add Student</Button></DialogTrigger>
@@ -114,8 +132,21 @@ const StudentManagement = () => {
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2"><Label>Full Name</Label><Input value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))} required /></div>
-                <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required /></div>
-                <div className="space-y-2"><Label>Password</Label><Input value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required /></div>
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <Input type="email" placeholder="name@muslimacademy.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
+                  <p className="text-[10px] text-muted-foreground">Must be @muslimacademy.com</p>
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label>Password</Label>
+                  <Input type="password" placeholder="e.g. Student@123" value={form.password} onChange={e => { setForm(f => ({ ...f, password: e.target.value })); setPasswordErrors([]); }} required />
+                  {passwordErrors.length > 0 && (
+                    <ul className="text-[10px] text-destructive space-y-0.5">
+                      {passwordErrors.map((err, i) => <li key={i}>• {err}</li>)}
+                    </ul>
+                  )}
+                  <p className="text-[10px] text-muted-foreground">Min 8 chars, uppercase, lowercase, number, special char</p>
+                </div>
                 <div className="space-y-2"><Label>Roll Number</Label><Input value={form.roll_number} onChange={e => setForm(f => ({ ...f, roll_number: e.target.value }))} required /></div>
                 <div className="space-y-2">
                   <Label>Class</Label>
@@ -140,6 +171,21 @@ const StudentManagement = () => {
             </form>
           </DialogContent>
         </Dialog>
+      </div>
+
+      {/* Search & Filter */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search by name or roll number..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+        </div>
+        <Select value={filterClass} onValueChange={setFilterClass}>
+          <SelectTrigger className="w-36"><SelectValue placeholder="All Classes" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Classes</SelectItem>
+            {Array.from({ length: 12 }, (_, i) => <SelectItem key={i+1} value={String(i+1)}>{`Class ${i+1}`}</SelectItem>)}
+          </SelectContent>
+        </Select>
       </div>
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
@@ -191,10 +237,10 @@ const StudentManagement = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {students.length === 0 ? (
+                {filtered.length === 0 ? (
                   <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No students found</TableCell></TableRow>
                 ) : (
-                  students.map(s => (
+                  filtered.map(s => (
                     <TableRow key={s.id}>
                       <TableCell className="font-medium">{s.profile?.full_name || 'N/A'}</TableCell>
                       <TableCell>{s.roll_number}</TableCell>

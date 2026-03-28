@@ -8,6 +8,7 @@ import AdminAnnouncements from '@/components/admin/AdminAnnouncements';
 import AdminGallery from '@/components/admin/AdminGallery';
 import AdminMessages from '@/components/admin/AdminMessages';
 import AdminReviews from '@/components/admin/AdminReviews';
+import TeacherAttendance from '@/components/admin/TeacherAttendance';
 
 const AdminDashboard = () => (
   <DashboardLayout>
@@ -20,6 +21,7 @@ const AdminDashboard = () => (
       <Route path="gallery" element={<AdminGallery />} />
       <Route path="messages" element={<AdminMessages />} />
       <Route path="reviews" element={<AdminReviews />} />
+      <Route path="teacher-attendance" element={<TeacherAttendance />} />
     </Routes>
   </DashboardLayout>
 );
