@@ -671,6 +671,38 @@ export type Database = {
         }
         Relationships: []
       }
+      teacher_attendance: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          status: string
+          teacher_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          status?: string
+          teacher_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          status?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_attendance_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teachers: {
         Row: {
           created_at: string
