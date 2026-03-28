@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, GraduationCap, BookOpen, Bell,
   ClipboardList, FileText, Calendar, BarChart3, MessageSquare,
-  Upload, BookMarked, Image as ImageIcon, Mail
+  Upload, BookMarked, Image as ImageIcon, Mail, CalendarCheck
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,6 +17,7 @@ const adminItems = [
   { title: 'Students', url: '/dashboard/admin/students', icon: Users },
   { title: 'Teachers', url: '/dashboard/admin/teachers', icon: GraduationCap },
   { title: 'Courses', url: '/dashboard/admin/courses', icon: BookOpen },
+  { title: 'Teacher Attendance', url: '/dashboard/admin/teacher-attendance', icon: CalendarCheck },
   { title: 'Announcements', url: '/dashboard/admin/announcements', icon: Bell },
   { title: 'Gallery', url: '/dashboard/admin/gallery', icon: ImageIcon },
   { title: 'Messages', url: '/dashboard/admin/messages', icon: Mail },

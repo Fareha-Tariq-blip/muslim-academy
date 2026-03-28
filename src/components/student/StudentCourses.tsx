@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, BookOpen, FileText, PlusCircle, Info } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Loader2, BookOpen, FileText, PlusCircle, Info, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +19,7 @@ const StudentCourses = () => {
   const [studentSection, setStudentSection] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
 
   const fetchData = async () => {
     if (!user) return;
@@ -40,7 +42,6 @@ const StudentCourses = () => {
       setMyCourses([]);
     }
 
-    // Only fetch courses matching the student's class
     const { data: all } = await supabase.from('courses').select('*').eq('class', s.class);
     const filtered = (all || []).filter(c => !enrolledCourseIds.includes(c.id));
     setAvailableCourses(filtered);
@@ -67,11 +68,14 @@ const StudentCourses = () => {
     setEnrolling(null);
   };
 
+  const filterCourses = (courses: any[]) =>
+    courses.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+
   if (loading) return <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <h2 className="font-display text-2xl font-bold text-foreground">My Courses</h2>
         {studentClass && (
           <Badge variant="secondary" className="text-sm px-3 py-1">
@@ -79,7 +83,12 @@ const StudentCourses = () => {
           </Badge>
         )}
       </div>
-      
+
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Search courses..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+      </div>
+
       <Tabs defaultValue="enrolled" className="w-full">
         <TabsList>
           <TabsTrigger value="enrolled">Enrolled ({myCourses.length})</TabsTrigger>
@@ -87,11 +96,11 @@ const StudentCourses = () => {
         </TabsList>
 
         <TabsContent value="enrolled" className="mt-4">
-          {myCourses.length === 0 ? (
-            <Card className="border-dashed"><CardContent className="p-8 text-center text-muted-foreground">Not enrolled in any courses. Browse available courses to enroll!</CardContent></Card>
+          {filterCourses(myCourses).length === 0 ? (
+            <Card className="border-dashed"><CardContent className="p-8 text-center text-muted-foreground">No courses found. Browse available courses to enroll!</CardContent></Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {myCourses.map(c => (
+              {filterCourses(myCourses).map(c => (
                 <Card key={c.id} className="hover:shadow-lg transition-all hover:border-primary/30">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-3">
@@ -133,11 +142,11 @@ const StudentCourses = () => {
             </p>
           </div>
 
-          {availableCourses.length === 0 ? (
+          {filterCourses(availableCourses).length === 0 ? (
             <Card className="border-dashed"><CardContent className="p-8 text-center text-muted-foreground">No more courses available for your class.</CardContent></Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {availableCourses.map(c => (
+              {filterCourses(availableCourses).map(c => (
                 <Card key={c.id} className="hover:shadow-lg transition-all hover:border-primary/30">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-3">
