@@ -65,7 +65,49 @@ Deno.serve(async (req) => {
     }
 
     // Default: create user
-    const { email, password, full_name, role } = body;
+    const email = body.email?.trim().toLowerCase();
+    const { password, full_name, role } = body;
+
+    if (!email || !password || !full_name || !role) {
+      return new Response(JSON.stringify({ error: "email, password, full_name and role are required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: listedUsers, error: listError } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    if (listError) {
+      return new Response(JSON.stringify({ error: listError.message }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const existingUser = (listedUsers?.users || []).find((listedUser) => listedUser.email?.toLowerCase() === email);
+
+    if (existingUser) {
+      const [{ data: existingProfile }, { data: existingTeacher }, { data: existingStudent }] = await Promise.all([
+        adminClient.from("profiles").select("id").eq("user_id", existingUser.id).maybeSingle(),
+        adminClient.from("teachers").select("id").eq("user_id", existingUser.id).maybeSingle(),
+        adminClient.from("students").select("id").eq("user_id", existingUser.id).maybeSingle(),
+      ]);
+
+      if (existingProfile || existingTeacher || existingStudent) {
+        return new Response(JSON.stringify({ error: "User with this email already exists" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { error: staleDeleteError } = await adminClient.auth.admin.deleteUser(existingUser.id);
+      if (staleDeleteError) {
+        return new Response(JSON.stringify({ error: staleDeleteError.message }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email,
       password,
@@ -75,6 +117,22 @@ Deno.serve(async (req) => {
 
     if (createError) {
       return new Response(JSON.stringify({ error: createError.message }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { error: profileError } = await adminClient.from("profiles").upsert({
+      user_id: newUser.user.id,
+      full_name,
+      role,
+    }, {
+      onConflict: "user_id",
+    });
+
+    if (profileError) {
+      await adminClient.auth.admin.deleteUser(newUser.user.id);
+      return new Response(JSON.stringify({ error: profileError.message }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

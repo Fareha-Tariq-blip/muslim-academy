@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Loader2, Sparkles, Trash2, Upload, FileText } from 'lucide-react';
+import { Plus, Loader2, Sparkles, Trash2, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -22,9 +22,9 @@ const QuizCreator = () => {
   const [form, setForm] = useState({ title: '', course_id: '', total_marks: '10' });
   const [questions, setQuestions] = useState<{ question: string; options: string[]; correct_answer: string; marks: number }[]>([]);
   const [aiTopic, setAiTopic] = useState('');
+  const [aiQuestionCount, setAiQuestionCount] = useState('5');
   const [aiLoading, setAiLoading] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
+  const [aiMaterialFile, setAiMaterialFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -62,12 +62,40 @@ const QuizCreator = () => {
     }));
   };
 
+  const readMaterialText = async (selectedFile: File) => {
+    const extension = selectedFile.name.split('.').pop()?.toLowerCase();
+
+    if (selectedFile.type.startsWith('text/') || ['txt', 'md', 'csv', 'json'].includes(extension || '')) {
+      return (await selectedFile.text()).slice(0, 12000);
+    }
+
+    if (extension === 'pdf') {
+      const bytes = new Uint8Array(await selectedFile.arrayBuffer());
+      const rawText = Array.from(bytes)
+        .map((byte) => (byte >= 32 && byte <= 126 ? String.fromCharCode(byte) : ' '))
+        .join('')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      if (!rawText) {
+        throw new Error('Could not extract readable text from this PDF.');
+      }
+
+      return rawText.slice(0, 12000);
+    }
+
+    throw new Error('Use a text or PDF file for AI quiz generation.');
+  };
+
   const generateWithAI = async () => {
     if (!aiTopic.trim()) { toast.error('Enter a topic'); return; }
     setAiLoading(true);
     try {
+      const count = Math.min(Math.max(Number(aiQuestionCount) || 5, 1), 20);
+      const materialText = aiMaterialFile ? await readMaterialText(aiMaterialFile) : undefined;
+
       const { data, error } = await supabase.functions.invoke('generate-quiz', {
-        body: { topic: aiTopic, count: 5 }
+        body: { topic: aiTopic, count, materialText }
       });
       if (error) throw error;
       if (data?.questions) {
@@ -80,7 +108,7 @@ const QuizCreator = () => {
         toast.success(`Generated ${data.questions.length} questions!`);
       }
     } catch (err: any) {
-      toast.error('AI generation failed. Add questions manually.');
+      toast.error(err?.message || 'AI generation failed. Add questions manually.');
     }
     setAiLoading(false);
   };
@@ -90,27 +118,9 @@ const QuizCreator = () => {
     if (questions.length === 0) { toast.error('Add at least one question'); return; }
     setSaving(true);
 
-    // Upload file if present
-    let fileUrl: string | null = null;
-    if (file) {
-      setUploading(true);
-      const ext = file.name.split('.').pop();
-      const filePath = `${user!.id}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage.from('quiz-files').upload(filePath, file);
-      if (uploadError) {
-        toast.error('File upload failed: ' + uploadError.message);
-        setSaving(false);
-        setUploading(false);
-        return;
-      }
-      const { data: urlData } = supabase.storage.from('quiz-files').getPublicUrl(filePath);
-      fileUrl = urlData.publicUrl;
-      setUploading(false);
-    }
-
     const totalMarks = questions.reduce((sum, q) => sum + q.marks, 0);
     const { data: quiz, error } = await supabase.from('quizzes').insert({
-      title: form.title + (fileUrl ? ` [File: ${fileUrl}]` : ''),
+      title: form.title,
       course_id: form.course_id,
       total_marks: totalMarks,
       created_by: user?.id,
@@ -131,7 +141,9 @@ const QuizCreator = () => {
     setDialogOpen(false);
     setQuestions([]);
     setForm({ title: '', course_id: '', total_marks: '10' });
-    setFile(null);
+    setAiMaterialFile(null);
+    setAiQuestionCount('5');
+    setAiTopic('');
 
     // Refresh
     const { data: t } = await supabase.from('teachers').select('id').eq('user_id', user!.id).single();
@@ -166,23 +178,25 @@ const QuizCreator = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Attach File (optional - PDF, image, etc.)</Label>
-                <div className="flex items-center gap-2">
-                  <Input type="file" onChange={e => setFile(e.target.files?.[0] || null)} className="flex-1" />
-                  {file && (
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <FileText className="h-4 w-4" />
-                      <span className="truncate max-w-[120px]">{file.name}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
               <Card className="border-dashed">
                 <CardContent className="p-4">
-                  <div className="flex gap-2">
-                    <Input placeholder="Enter topic for AI generation..." value={aiTopic} onChange={e => setAiTopic(e.target.value)} />
+                  <div className="space-y-4">
+                    <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_120px]">
+                      <Input placeholder="Enter topic for AI generation..." value={aiTopic} onChange={e => setAiTopic(e.target.value)} />
+                      <Input type="number" min={1} max={20} value={aiQuestionCount} onChange={e => setAiQuestionCount(e.target.value)} placeholder="MCQs" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Related material for AI (optional text or PDF)</Label>
+                      <div className="flex items-center gap-2">
+                        <Input type="file" accept=".txt,.md,.csv,.json,.pdf,text/*,application/pdf" onChange={e => setAiMaterialFile(e.target.files?.[0] || null)} className="flex-1" />
+                        {aiMaterialFile && (
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <FileText className="h-4 w-4" />
+                            <span className="max-w-[140px] truncate">{aiMaterialFile.name}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                     <Button type="button" variant="secondary" onClick={generateWithAI} disabled={aiLoading}>
                       {aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                       Generate with AI
@@ -190,6 +204,10 @@ const QuizCreator = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              <p className="text-sm text-muted-foreground">
+                Students can attempt each quiz only once and may upload a theory-answer file when needed.
+              </p>
 
               <div className="space-y-4">
                 {questions.map((q, qi) => (
@@ -227,8 +245,8 @@ const QuizCreator = () => {
               </Button>
 
               <Button type="submit" className="w-full" disabled={saving}>
-                {(saving || uploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {uploading ? 'Uploading file...' : `Create Quiz (${questions.length} questions)`}
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {`Create Quiz (${questions.length} questions)`}
               </Button>
             </form>
           </DialogContent>

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Loader2, GraduationCap, Users, Award, Clock } from 'lucide-react';
+import { ArrowRight, BookOpen, Loader2, GraduationCap, Users, Award, Clock, ShieldCheck, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -26,6 +26,20 @@ const Login = () => {
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
+  const resolveRole = async (userId: string) => {
+    const [{ data: profile }, { data: teacher }, { data: student }] = await Promise.all([
+      supabase.from('profiles').select('role').eq('user_id', userId).maybeSingle(),
+      supabase.from('teachers').select('id').eq('user_id', userId).maybeSingle(),
+      supabase.from('students').select('id').eq('user_id', userId).maybeSingle(),
+    ]);
+
+    if (profile?.role === 'admin') return 'admin';
+    if (teacher) return 'teacher';
+    if (student) return 'student';
+
+    return profile?.role || 'student';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -37,11 +51,9 @@ const Login = () => {
     }
 
     toast.success('Welcome back!');
-    // Fetch role directly and navigate
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      const { data } = await supabase.from('profiles').select('role').eq('user_id', user.id).single();
-      const role = data?.role || 'student';
+      const role = await resolveRole(user.id);
       navigate(`/dashboard/${role}`, { replace: true });
     } else {
       navigate('/dashboard/student', { replace: true });
@@ -54,97 +66,131 @@ const Login = () => {
       <Header />
 
       <main className="flex-1 pt-20">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid gap-10 lg:grid-cols-2 items-start">
-            {/* Left: Login Form */}
-            <div className="flex flex-col justify-center">
-              <div className="mb-8">
-                <h2 className="font-display text-3xl font-bold text-foreground md:text-4xl">
-                  Welcome to <span className="text-primary">Muslim Academy</span> Portal
-                </h2>
-                <p className="mt-2 text-muted-foreground">
-                  Sign in to access your dashboard, courses, grades, and more.
-                </p>
+        <div className="container mx-auto px-4 py-10 md:py-14">
+          <div className="overflow-hidden rounded-[2rem] border border-border/60 bg-card/70 shadow-2xl backdrop-blur-xl">
+            <div className="grid lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)]">
+              <div className="section-gradient-1 p-6 md:p-10 lg:p-12">
+                <div className="mb-8 space-y-4">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    Student & Staff Login
+                  </span>
+                  <div className="space-y-3">
+                    <h2 className="font-display text-4xl font-bold leading-tight text-foreground md:text-5xl">
+                      Welcome back to the Muslim Academy portal.
+                    </h2>
+                    <p className="max-w-md text-base leading-relaxed text-muted-foreground">
+                      Securely access classes, attendance, grades, quizzes, and academy updates in one place.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 shadow-sm">
+                      <ShieldCheck className="h-4 w-4 text-secondary" /> Protected access
+                    </span>
+                    <span className="inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 shadow-sm">
+                      <GraduationCap className="h-4 w-4 text-accent" /> Role-based dashboards
+                    </span>
+                  </div>
+                </div>
+
+                <Card className="glass-card border-border/60 shadow-xl">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md">
+                        <GraduationCap className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <CardTitle className="font-display text-xl">Sign In</CardTitle>
+                        <CardDescription>Use your academy email to continue</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email Address</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="your@muslimacademy.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          className="h-11 bg-background/80"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Password</Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          className="h-11 bg-background/80"
+                        />
+                      </div>
+                      <Button type="submit" className="h-11 w-full text-base font-semibold shadow-lg shadow-primary/20" disabled={loading}>
+                        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+                        Continue to Dashboard
+                      </Button>
+                    </form>
+ 
+                    <div className="mt-5 rounded-2xl border border-accent/20 bg-accent/10 p-4 text-xs text-muted-foreground">
+                      <p className="mb-2 font-semibold text-foreground">Demo Accounts</p>
+                      <div className="space-y-1.5">
+                        <p>Admin: admin@muslimacademy.com / admin123</p>
+                        <p>Teacher: teacher1@muslimacademy.com / teacher123</p>
+                        <p>Student: student1@muslimacademy.com / student123</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
-              <Card className="shadow-xl border-border/50">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
-                      <GraduationCap className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <CardTitle className="font-display text-xl">Sign In</CardTitle>
-                      <CardDescription>Access your academy portal</CardDescription>
+              <div className="relative min-h-[420px] overflow-hidden bg-[hsl(var(--sidebar-background))] lg:min-h-full">
+                <img
+                  src={campusImg}
+                  alt="Muslim Academy campus and classroom environment"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                  width={960}
+                  height={1080}
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--sidebar-background))]/90 via-[hsl(var(--sidebar-background))]/68 to-[hsl(var(--accent))]/38" />
+
+                <div className="relative flex h-full flex-col justify-between gap-10 p-6 text-[hsl(var(--sidebar-foreground))] md:p-10">
+                  <div className="max-w-xl space-y-4 pt-6">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(var(--sidebar-foreground))] backdrop-blur-sm">
+                      <BookOpen className="h-3.5 w-3.5 text-accent" />
+                      Premium Education Since 2008
+                    </span>
+                    <div className="space-y-3">
+                      <h3 className="font-display text-4xl font-bold leading-tight md:text-5xl">
+                        Muslim Girls High School & College
+                      </h3>
+                      <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">
+                        Affiliated with BISE Lahore
+                      </p>
+                      <p className="max-w-lg text-base leading-relaxed text-[hsl(var(--sidebar-foreground))]/82 md:text-lg">
+                        Where academic excellence, discipline, and Islamic values come together to prepare confident leaders for tomorrow.
+                      </p>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="your@muslimacademy.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="h-11"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="h-11"
-                      />
-                    </div>
-                    <Button type="submit" className="w-full h-11 bg-primary hover:bg-primary/90 shadow-md text-base font-semibold" disabled={loading}>
-                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Sign In
-                    </Button>
-                  </form>
 
-                  <div className="mt-5 rounded-lg bg-accent/10 border border-accent/30 p-3 text-xs text-muted-foreground">
-                    <p className="font-semibold mb-1 text-foreground">Demo Accounts:</p>
-                    <p>Admin: admin@muslimacademy.com / admin123</p>
-                    <p>Teacher: teacher1@muslimacademy.com / teacher123</p>
-                    <p>Student: student1@muslimacademy.com / student123</p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {stats.map((stat, i) => (
+                      <div key={i} className="rounded-2xl border border-white/12 bg-white/10 p-4 shadow-lg backdrop-blur-md transition-transform duration-300 hover:-translate-y-1">
+                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-accent/20 text-accent">
+                          <stat.icon className="h-5 w-5" />
+                        </div>
+                        <p className="font-display text-3xl font-bold text-[hsl(var(--sidebar-foreground))]">{stat.value}</p>
+                        <p className="mt-1 text-sm text-[hsl(var(--sidebar-foreground))]/72">{stat.label}</p>
+                      </div>
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Right: Academy image + info */}
-            <div className="space-y-6">
-              <div className="rounded-2xl overflow-hidden shadow-xl border border-border/30">
-                <img src={campusImg} alt="Muslim Academy Campus" className="w-full h-64 md:h-80 object-cover" loading="lazy" width={960} height={1080} />
-              </div>
-
-              <div className="rounded-xl bg-accent/10 border border-accent/30 p-6">
-                <h3 className="font-display text-xl font-bold text-foreground mb-1">Muslim Girls High School & College</h3>
-                <p className="text-sm text-primary font-semibold mb-2">Affiliated with BISE Lahore</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Empowering young minds with quality education rooted in Islamic values since 2008. Building confident, knowledgeable leaders for tomorrow.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {stats.map((stat, i) => (
-                  <div key={i} className="rounded-xl bg-primary/10 border border-primary/20 p-4 text-center transition-all hover:shadow-md hover:bg-primary/15">
-                    <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                      <stat.icon className="h-5 w-5" />
-                    </div>
-                    <p className="font-display text-2xl font-bold text-foreground">{stat.value}</p>
-                    <p className="text-xs text-muted-foreground font-medium">{stat.label}</p>
-                  </div>
-                ))}
+                </div>
               </div>
             </div>
           </div>
