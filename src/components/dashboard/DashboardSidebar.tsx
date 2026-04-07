@@ -51,7 +51,7 @@ const DashboardSidebar = () => {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
 
-  const items = role === 'admin' ? adminItems : role === 'teacher' ? teacherItems : studentItems;
+  const items = role === 'admin' ? adminItems : role === 'teacher' ? teacherItems : role === 'student' ? studentItems : [];
   const label = role === 'admin' ? 'Admin Panel' : role === 'teacher' ? 'Teacher Portal' : 'Student Portal';
 
   return (

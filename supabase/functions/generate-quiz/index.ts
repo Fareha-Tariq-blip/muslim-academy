@@ -9,9 +9,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { topic, count = 5 } = await req.json();
+    const { topic, count = 5, materialText = "" } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+
+    const questionCount = Math.min(Math.max(Number(count) || 5, 1), 20);
+    const materialContext = typeof materialText === "string" && materialText.trim()
+      ? `Use the following study material as the primary source for the quiz:\n${materialText.slice(0, 12000)}`
+      : "No study material file was provided. Use the topic only.";
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -19,8 +24,8 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: "Generate multiple choice quiz questions. Return JSON with a 'questions' array. Each question has: question (string), options (array of 4 strings), correct_answer (string matching one option)." },
-          { role: "user", content: `Generate ${count} quiz questions about: ${topic}` }
+          { role: "system", content: "Generate multiple choice quiz questions. Return JSON with a 'questions' array. Each question has: question (string), options (array of 4 strings), correct_answer (string matching one option). Always return exactly the requested number of questions, with 4 options per question." },
+          { role: "user", content: `Topic: ${topic}\nRequested MCQs: ${questionCount}\n${materialContext}` }
         ],
         tools: [{
           type: "function",
