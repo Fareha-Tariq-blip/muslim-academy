@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string, userMeta?: Record<string, any>) => {
     const [{ data: profileData }, { data: teacher }, { data: student }] = await Promise.all([
       supabase.from('profiles').select('*').eq('user_id', userId).maybeSingle(),
       supabase.from('teachers').select('id').eq('user_id', userId).maybeSingle(),
@@ -35,18 +35,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setProfile(profileData ?? null);
 
-    if (profileData?.role === 'admin') {
-      setRole('admin');
-      return;
-    }
+    // If profile exists, use profile role + table checks
+    if (profileData?.role === 'admin') { setRole('admin'); return; }
+    if (teacher) { setRole('teacher'); return; }
+    if (student) { setRole('student'); return; }
 
-    if (teacher) {
-      setRole('teacher');
-      return;
-    }
-
-    if (student) {
-      setRole('student');
+    // If no profile at all, try to determine from user metadata
+    if (!profileData && userMeta?.role) {
+      const metaRole = userMeta.role as UserRole;
+      setRole(metaRole ?? 'student');
       return;
     }
 
@@ -61,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (nextSession?.user) {
         try {
-          await fetchProfile(nextSession.user.id);
+          await fetchProfile(nextSession.user.id, nextSession.user.user_metadata);
         } finally {
           setLoading(false);
         }
