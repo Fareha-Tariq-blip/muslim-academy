@@ -23,22 +23,17 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, user, role, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
-  const resolveRole = async (userId: string) => {
-    const [{ data: profile }, { data: teacher }, { data: student }] = await Promise.all([
-      supabase.from('profiles').select('role').eq('user_id', userId).maybeSingle(),
-      supabase.from('teachers').select('id').eq('user_id', userId).maybeSingle(),
-      supabase.from('students').select('id').eq('user_id', userId).maybeSingle(),
-    ]);
-
-    if (profile?.role === 'admin') return 'admin';
-    if (teacher) return 'teacher';
-    if (student) return 'student';
-
-    return profile?.role || 'student';
-  };
+  // After login, wait for AuthContext to resolve the role, then navigate
+  useEffect(() => {
+    if (loginSuccess && !authLoading && user && role) {
+      navigate(`/dashboard/${role}`, { replace: true });
+      setLoginSuccess(false);
+    }
+  }, [loginSuccess, authLoading, user, role, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,13 +46,7 @@ const Login = () => {
     }
 
     toast.success('Welcome back!');
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const role = await resolveRole(user.id);
-      navigate(`/dashboard/${role}`, { replace: true });
-    } else {
-      navigate('/dashboard/student', { replace: true });
-    }
+    setLoginSuccess(true);
     setLoading(false);
   };
 
