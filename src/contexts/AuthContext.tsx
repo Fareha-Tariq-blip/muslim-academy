@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (nextSession?.user) {
         try {
-          await fetchProfile(nextSession.user.id);
+          await fetchProfile(nextSession.user.id, nextSession.user.user_metadata);
         } finally {
           setLoading(false);
         }
