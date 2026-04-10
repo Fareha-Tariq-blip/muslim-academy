@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import campusImg from '@/assets/academy-campus.jpg';
-import { supabase } from '@/integrations/supabase/client';
+
 
 const stats = [
   { icon: Clock, value: '15+', label: 'Years of Experience' },
