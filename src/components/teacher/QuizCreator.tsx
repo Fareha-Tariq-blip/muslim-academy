@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Loader2, Sparkles, Trash2, FileText } from 'lucide-react';
+import { Plus, Loader2, Sparkles, Trash2, FileText, ChevronDown, ChevronUp, Users, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 
 const QuizCreator = () => {
   const { user } = useAuth();
@@ -25,6 +26,9 @@ const QuizCreator = () => {
   const [aiQuestionCount, setAiQuestionCount] = useState('5');
   const [aiLoading, setAiLoading] = useState(false);
   const [aiMaterialFile, setAiMaterialFile] = useState<File | null>(null);
+  const [expandedQuiz, setExpandedQuiz] = useState<string | null>(null);
+  const [attemptData, setAttemptData] = useState<Record<string, { attempts: any[]; enrolled: any[] }>>({});
+  const [loadingAttempts, setLoadingAttempts] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -45,6 +49,33 @@ const QuizCreator = () => {
     fetch();
   }, [user]);
 
+  const loadAttempts = async (quiz: any) => {
+    if (expandedQuiz === quiz.id) { setExpandedQuiz(null); return; }
+    setExpandedQuiz(quiz.id);
+    if (attemptData[quiz.id]) return;
+    setLoadingAttempts(quiz.id);
+
+    const { data: enrollments } = await supabase.from('enrollments').select('student_id').eq('course_id', quiz.course_id);
+    const studentIds = enrollments?.map(e => e.student_id) || [];
+
+    let enrolledStudents: any[] = [];
+    if (studentIds.length) {
+      const { data: students } = await supabase.from('students').select('id, user_id, roll_number').in('id', studentIds);
+      if (students?.length) {
+        const enriched = await Promise.all(students.map(async (s) => {
+          const { data: p } = await supabase.from('profiles').select('full_name').eq('user_id', s.user_id).single();
+          return { ...s, full_name: p?.full_name || 'Unknown' };
+        }));
+        enrolledStudents = enriched;
+      }
+    }
+
+    const { data: attempts } = await supabase.from('quiz_attempts').select('*').eq('quiz_id', quiz.id);
+
+    setAttemptData(prev => ({ ...prev, [quiz.id]: { attempts: attempts || [], enrolled: enrolledStudents } }));
+    setLoadingAttempts(null);
+  };
+
   const addQuestion = () => {
     setQuestions(q => [...q, { question: '', options: ['', '', '', ''], correct_answer: '', marks: 1 }]);
   };
@@ -64,26 +95,17 @@ const QuizCreator = () => {
 
   const readMaterialText = async (selectedFile: File) => {
     const extension = selectedFile.name.split('.').pop()?.toLowerCase();
-
     if (selectedFile.type.startsWith('text/') || ['txt', 'md', 'csv', 'json'].includes(extension || '')) {
       return (await selectedFile.text()).slice(0, 12000);
     }
-
     if (extension === 'pdf') {
       const bytes = new Uint8Array(await selectedFile.arrayBuffer());
       const rawText = Array.from(bytes)
         .map((byte) => (byte >= 32 && byte <= 126 ? String.fromCharCode(byte) : ' '))
-        .join('')
-        .replace(/\s+/g, ' ')
-        .trim();
-
-      if (!rawText) {
-        throw new Error('Could not extract readable text from this PDF.');
-      }
-
+        .join('').replace(/\s+/g, ' ').trim();
+      if (!rawText) throw new Error('Could not extract readable text from this PDF.');
       return rawText.slice(0, 12000);
     }
-
     throw new Error('Use a text or PDF file for AI quiz generation.');
   };
 
@@ -93,7 +115,6 @@ const QuizCreator = () => {
     try {
       const count = Math.min(Math.max(Number(aiQuestionCount) || 5, 1), 20);
       const materialText = aiMaterialFile ? await readMaterialText(aiMaterialFile) : undefined;
-
       const { data, error } = await supabase.functions.invoke('generate-quiz', {
         body: { topic: aiTopic, count, materialText }
       });
@@ -105,6 +126,10 @@ const QuizCreator = () => {
           correct_answer: q.correct_answer || q.options?.[0] || '',
           marks: 1,
         })));
+        // Auto-fill title from topic if empty
+        if (!form.title.trim()) {
+          setForm(f => ({ ...f, title: aiTopic.trim() }));
+        }
         toast.success(`Generated ${data.questions.length} questions!`);
       }
     } catch (err: any) {
@@ -116,11 +141,12 @@ const QuizCreator = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (questions.length === 0) { toast.error('Add at least one question'); return; }
+    if (!form.title.trim()) { toast.error('Enter a quiz title'); return; }
     setSaving(true);
 
     const totalMarks = questions.reduce((sum, q) => sum + q.marks, 0);
     const { data: quiz, error } = await supabase.from('quizzes').insert({
-      title: form.title,
+      title: form.title.trim(),
       course_id: form.course_id,
       total_marks: totalMarks,
       created_by: user?.id,
@@ -145,7 +171,6 @@ const QuizCreator = () => {
     setAiQuestionCount('5');
     setAiTopic('');
 
-    // Refresh
     const { data: t } = await supabase.from('teachers').select('id').eq('user_id', user!.id).single();
     if (t) {
       const { data: c } = await supabase.from('courses').select('id').eq('teacher_id', t.id);
@@ -158,6 +183,11 @@ const QuizCreator = () => {
     setSaving(false);
   };
 
+  const getCourseName = (courseId: string) => {
+    const c = courses.find(x => x.id === courseId);
+    return c ? `${c.name} (${c.class}-${c.section})` : 'Unknown';
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -168,7 +198,7 @@ const QuizCreator = () => {
             <DialogHeader><DialogTitle>Create New Quiz</DialogTitle></DialogHeader>
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2"><Label>Quiz Title</Label><Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required /></div>
+                <div className="space-y-2"><Label>Quiz Title</Label><Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required placeholder="e.g. Chapter 5 Quiz" /></div>
                 <div className="space-y-2">
                   <Label>Course</Label>
                   <Select value={form.course_id} onValueChange={v => setForm(f => ({ ...f, course_id: v }))}>
@@ -257,29 +287,88 @@ const QuizCreator = () => {
         <CardContent className="p-0">
           {loading ? (
             <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+          ) : quizzes.length === 0 ? (
+            <div className="text-center text-muted-foreground py-8">No quizzes</div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Total Marks</TableHead>
-                  <TableHead>Created</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {quizzes.length === 0 ? (
-                  <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-8">No quizzes</TableCell></TableRow>
-                ) : (
-                  quizzes.map(q => (
-                    <TableRow key={q.id}>
-                      <TableCell className="font-medium">{q.title}</TableCell>
-                      <TableCell>{q.total_marks}</TableCell>
-                      <TableCell>{new Date(q.created_at).toLocaleDateString()}</TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+            <div className="divide-y">
+              {quizzes.map(q => (
+                <div key={q.id}>
+                  <button
+                    className="flex w-full items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors text-left"
+                    onClick={() => loadAttempts(q)}
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground">{q.title}</p>
+                      <p className="text-xs text-muted-foreground">{getCourseName(q.course_id)} · {q.total_marks} marks · {new Date(q.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      {expandedQuiz === q.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </div>
+                  </button>
+
+                  {expandedQuiz === q.id && (
+                    <div className="border-t bg-muted/20 px-4 py-3">
+                      {loadingAttempts === q.id ? (
+                        <div className="flex items-center justify-center p-4"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
+                      ) : attemptData[q.id] ? (
+                        <div>
+                          <p className="text-sm font-medium text-foreground mb-2">
+                            Student Attempts ({attemptData[q.id].attempts.length}/{attemptData[q.id].enrolled.length} students)
+                          </p>
+                          {attemptData[q.id].enrolled.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">No students enrolled in this course.</p>
+                          ) : (
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Student</TableHead>
+                                  <TableHead>Roll No</TableHead>
+                                  <TableHead>Status</TableHead>
+                                  <TableHead>Score</TableHead>
+                                  <TableHead>File</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {attemptData[q.id].enrolled.map(student => {
+                                  const attempt = attemptData[q.id].attempts.find(a => a.student_id === student.id);
+                                  const answersJson = attempt?.answers_json as any;
+                                  const theoryFileUrl = answersJson?.theory_file_url;
+                                  const theoryFileName = answersJson?.theory_file_name;
+                                  return (
+                                    <TableRow key={student.id}>
+                                      <TableCell className="font-medium">{student.full_name}</TableCell>
+                                      <TableCell>{student.roll_number}</TableCell>
+                                      <TableCell>
+                                        {attempt ? (
+                                          <Badge variant="default" className="gap-1 bg-green-600"><CheckCircle className="h-3 w-3" /> Attempted</Badge>
+                                        ) : (
+                                          <Badge variant="secondary" className="gap-1"><XCircle className="h-3 w-3" /> Not Attempted</Badge>
+                                        )}
+                                      </TableCell>
+                                      <TableCell>
+                                        {attempt ? `${attempt.score ?? 0}/${q.total_marks}` : '—'}
+                                      </TableCell>
+                                      <TableCell>
+                                        {theoryFileUrl ? (
+                                          <a href={theoryFileUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline text-xs flex items-center gap-1">
+                                            <FileText className="h-3 w-3" /> {theoryFileName || 'View File'}
+                                          </a>
+                                        ) : '—'}
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                })}
+                              </TableBody>
+                            </Table>
+                          )}
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>
