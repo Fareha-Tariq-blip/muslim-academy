@@ -7,8 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Quote, Star, Send, Loader2, ImagePlus } from 'lucide-react';
+import { Quote, Send, Loader2, ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const CommunityReviews = () => {
   const [reviews, setReviews] = useState<any[]>([]);
@@ -16,6 +17,7 @@ const CommunityReviews = () => {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: '', role: 'parent', content: '' });
   const [file, setFile] = useState<File | null>(null);
+  const { ref, isVisible } = useScrollAnimation();
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -55,8 +57,8 @@ const CommunityReviews = () => {
   };
 
   return (
-    <section className="py-20 bg-muted/30">
-      <div className="container mx-auto px-4">
+    <section className="py-20 bg-gradient-to-br from-accent/10 via-secondary/5 to-primary/10" ref={ref}>
+      <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
         <div className="text-center mb-12">
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Community</span>
           <h2 className="font-display text-3xl font-bold text-foreground mt-2 md:text-4xl">
@@ -69,11 +71,13 @@ const CommunityReviews = () => {
 
         {reviews.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-10">
-            {reviews.map(r => (
-              <Card key={r.id} className="overflow-hidden">
-                {r.image_url && (
-                  <img src={r.image_url} alt="" className="w-full h-48 object-cover" />
-                )}
+            {reviews.map((r, i) => (
+              <Card
+                key={r.id}
+                className={`overflow-hidden border-accent/30 bg-accent/10 transition-all duration-500 hover:shadow-xl hover:-translate-y-1 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                style={{ transitionDelay: `${i * 100 + 200}ms` }}
+              >
+                {r.image_url && <img src={r.image_url} alt="" className="w-full h-48 object-cover" />}
                 <CardContent className="p-6">
                   <Quote className="h-6 w-6 text-primary/30 mb-2" />
                   <p className="text-foreground italic leading-relaxed text-sm">"{r.content}"</p>

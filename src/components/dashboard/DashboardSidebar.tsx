@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, GraduationCap, BookOpen, Bell,
   ClipboardList, FileText, Calendar, BarChart3, MessageSquare,
-  Upload, BookMarked, Image as ImageIcon, Mail, CalendarCheck
+  Upload, BookMarked, Image as ImageIcon, Mail, CalendarCheck, UserCircle
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,7 @@ import logo from '@/assets/muslim-academy-logo.png';
 
 const adminItems = [
   { title: 'Overview', url: '/dashboard/admin', icon: LayoutDashboard },
+  { title: 'My Profile', url: '/dashboard/admin/profile', icon: UserCircle },
   { title: 'Students', url: '/dashboard/admin/students', icon: Users },
   { title: 'Teachers', url: '/dashboard/admin/teachers', icon: GraduationCap },
   { title: 'Courses', url: '/dashboard/admin/courses', icon: BookOpen },
@@ -26,6 +27,7 @@ const adminItems = [
 
 const teacherItems = [
   { title: 'Overview', url: '/dashboard/teacher', icon: LayoutDashboard },
+  { title: 'My Profile', url: '/dashboard/teacher/profile', icon: UserCircle },
   { title: 'Assignments', url: '/dashboard/teacher/assignments', icon: ClipboardList },
   { title: 'Quizzes', url: '/dashboard/teacher/quizzes', icon: FileText },
   { title: 'Grades', url: '/dashboard/teacher/grades', icon: BookMarked },
@@ -37,6 +39,7 @@ const teacherItems = [
 
 const studentItems = [
   { title: 'Overview', url: '/dashboard/student', icon: LayoutDashboard },
+  { title: 'My Profile', url: '/dashboard/student/profile', icon: UserCircle },
   { title: 'My Courses', url: '/dashboard/student/courses', icon: BookOpen },
   { title: 'Assignments', url: '/dashboard/student/assignments', icon: ClipboardList },
   { title: 'Quizzes', url: '/dashboard/student/quizzes', icon: FileText },

@@ -8,11 +8,13 @@ import CourseMaterialsManager from '@/components/teacher/CourseMaterialsManager'
 import StudentPerformance from '@/components/teacher/StudentPerformance';
 import GradeManager from '@/components/teacher/GradeManager';
 import StudentAnnouncements from '@/components/student/StudentAnnouncements';
+import UserProfile from '@/components/dashboard/UserProfile';
 
 const TeacherDashboard = () => (
   <DashboardLayout>
     <Routes>
       <Route index element={<TeacherOverview />} />
+      <Route path="profile" element={<UserProfile />} />
       <Route path="assignments" element={<AssignmentManager />} />
       <Route path="quizzes" element={<QuizCreator />} />
       <Route path="attendance" element={<AttendanceMarker />} />

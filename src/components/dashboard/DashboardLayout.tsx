@@ -26,27 +26,27 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col w-full">
-        <header className="sticky top-0 z-50 border-b border-border/40 bg-[hsl(var(--sidebar-background))]/95 backdrop-blur-xl">
+        <header className="sticky top-0 z-50 border-b border-white/10 bg-[hsl(210,45%,12%)] backdrop-blur-xl">
           <div className="flex min-h-16 items-center justify-between gap-4 px-4 sm:px-6">
             <div className="flex items-center gap-3">
-              <SidebarTrigger className="text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-accent-foreground))]" />
+              <SidebarTrigger className="text-[hsl(40,30%,96%)] hover:bg-white/10" />
               <Link to="/" className="flex items-center gap-2">
                 <img src={logo} alt="Muslim Academy" className="h-8 w-8 rounded-full object-cover" />
                 <div className="hidden sm:block">
-                  <span className="font-display text-sm font-bold text-[hsl(var(--sidebar-foreground))]">Muslim Academy</span>
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(var(--sidebar-foreground))]/60">Excellence in Education</p>
+                  <span className="font-display text-sm font-bold text-[hsl(40,30%,96%)]">Muslim Academy</span>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(40,20%,75%)]">Excellence in Education</p>
                 </div>
               </Link>
             </div>
 
-            <div className="hidden items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-[hsl(var(--sidebar-foreground))]/72 lg:flex">
+            <div className="hidden items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-[hsl(40,20%,80%)] lg:flex">
               <span>{portalLabel}</span>
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-              <span>Welcome, <span className="font-semibold text-[hsl(var(--sidebar-foreground))]">{displayName}</span></span>
+              <span>Welcome, <span className="font-semibold text-[hsl(40,30%,96%)]">{displayName}</span></span>
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-[hsl(var(--sidebar-foreground))]/72 hover:bg-white/10 hover:text-[hsl(var(--sidebar-foreground))]">
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-[hsl(40,20%,80%)] hover:bg-white/10 hover:text-[hsl(40,30%,96%)]">
                 <LogOut className="mr-2 h-4 w-4" /> Logout
               </Button>
             </div>

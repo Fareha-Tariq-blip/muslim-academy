@@ -1,17 +1,20 @@
 import { BookOpen, Heart, Users, Award } from 'lucide-react';
 import academyImg from '@/assets/academy_img.jpeg';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const About = () => {
+  const { ref, isVisible } = useScrollAnimation();
+
   const features = [
-    { icon: BookOpen, title: 'Modern Curriculum', desc: 'Comprehensive education covering sciences, arts, and technology', color: 'bg-primary/10 text-primary' },
-    { icon: Heart, title: 'Islamic Values', desc: 'Character building rooted in Quran and Sunnah teachings', color: 'bg-secondary/10 text-secondary' },
-    { icon: Users, title: 'Expert Faculty', desc: 'Qualified teachers dedicated to student success', color: 'bg-accent/10 text-accent' },
-    { icon: Award, title: 'Proven Results', desc: '95% success rate with top board exam performances', color: 'bg-primary/10 text-primary' },
+    { icon: BookOpen, title: 'Modern Curriculum', desc: 'Comprehensive education covering sciences, arts, and technology' },
+    { icon: Heart, title: 'Islamic Values', desc: 'Character building rooted in Quran and Sunnah teachings' },
+    { icon: Users, title: 'Expert Faculty', desc: 'Qualified teachers dedicated to student success' },
+    { icon: Award, title: 'Proven Results', desc: '95% success rate with top board exam performances' },
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-br from-secondary/10 via-accent/5 to-primary/10" id="about">
-      <div className="container mx-auto px-4">
+    <section className="py-20 bg-gradient-to-br from-secondary/10 via-accent/5 to-primary/10" id="about" ref={ref}>
+      <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
         <div className="text-center mb-12">
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">About Us</span>
           <h2 className="font-display text-3xl font-bold text-foreground mt-2 md:text-4xl">
@@ -41,7 +44,8 @@ const About = () => {
           {features.map((f, i) => (
             <div
               key={i}
-              className="group rounded-xl border border-accent/30 bg-accent/10 p-6 text-center transition-all hover:shadow-xl hover:-translate-y-1 hover:bg-accent/20"
+              className={`group rounded-xl border border-accent/30 bg-accent/10 p-6 text-center transition-all hover:shadow-xl hover:-translate-y-1 hover:bg-accent/20 duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+              style={{ transitionDelay: `${i * 100 + 300}ms` }}
             >
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent text-accent-foreground transition-transform group-hover:scale-110">
                 <f.icon className="h-7 w-7" />
