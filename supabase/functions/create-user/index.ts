@@ -52,6 +52,12 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      // Clean up all related records before deleting auth user
+      await Promise.all([
+        adminClient.from("profiles").delete().eq("user_id", user_id),
+        adminClient.from("teachers").delete().eq("user_id", user_id),
+        adminClient.from("students").delete().eq("user_id", user_id),
+      ]);
       const { error: deleteError } = await adminClient.auth.admin.deleteUser(user_id);
       if (deleteError) {
         return new Response(JSON.stringify({ error: deleteError.message }), {
