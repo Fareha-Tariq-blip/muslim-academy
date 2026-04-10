@@ -46,9 +46,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button asChild variant="ghost" size="sm" className="text-[hsl(var(--sidebar-foreground))]/72 hover:bg-white/10 hover:text-[hsl(var(--sidebar-foreground))]">
-                <Link to="/login">Login</Link>
-              </Button>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="text-[hsl(var(--sidebar-foreground))]/72 hover:bg-white/10 hover:text-[hsl(var(--sidebar-foreground))]">
                 <LogOut className="mr-2 h-4 w-4" /> Logout
               </Button>
