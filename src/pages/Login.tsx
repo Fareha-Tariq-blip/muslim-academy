@@ -57,7 +57,7 @@ const Login = () => {
       <main className="flex-1 pt-20">
         <div className="container mx-auto px-4 py-10 md:py-14">
           <div className="overflow-hidden rounded-[2rem] border border-border/60 bg-card/70 shadow-2xl backdrop-blur-xl">
-            <div className="grid lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)]">
+            <div className="grid lg:grid-cols-2">
               <div className="section-gradient-1 p-6 md:p-10 lg:p-12">
                 <div className="mb-8 space-y-4">
                   <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-primary">

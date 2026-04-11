@@ -137,7 +137,7 @@ const CourseManagement = () => {
                   <Select value={form.class} onValueChange={v => setForm(f => ({ ...f, class: v }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {Array.from({ length: 10 }, (_, i) => <SelectItem key={i+1} value={String(i+1)}>{`Class ${i+1}`}</SelectItem>)}
+                      {Array.from({ length: 12 }, (_, i) => <SelectItem key={i+1} value={String(i+1)}>{`Class ${i+1}`}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
