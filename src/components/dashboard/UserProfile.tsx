@@ -4,12 +4,22 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Mail, Phone, BookOpen, GraduationCap, User, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Loader2, Mail, Phone, BookOpen, GraduationCap, User, Shield, KeyRound, CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 const UserProfile = () => {
   const { user, role, profile } = useAuth();
   const [extra, setExtra] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  // Password reset state
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -25,6 +35,28 @@ const UserProfile = () => {
     };
     fetch();
   }, [user, role]);
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 8) { toast.error('Password must be at least 8 characters'); return; }
+    if (!/[A-Z]/.test(newPassword)) { toast.error('Password must contain an uppercase letter'); return; }
+    if (!/[a-z]/.test(newPassword)) { toast.error('Password must contain a lowercase letter'); return; }
+    if (!/[0-9]/.test(newPassword)) { toast.error('Password must contain a number'); return; }
+    if (!/[^A-Za-z0-9]/.test(newPassword)) { toast.error('Password must contain a special character'); return; }
+    if (newPassword !== confirmPassword) { toast.error('Passwords do not match'); return; }
+
+    setResetting(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Password updated successfully!');
+      setShowPasswordReset(false);
+      setNewPassword('');
+      setConfirmPassword('');
+    }
+    setResetting(false);
+  };
 
   if (loading) return <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
@@ -167,6 +199,73 @@ const UserProfile = () => {
           </Card>
         )}
       </div>
+
+      {/* Change Password Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="font-display flex items-center gap-2">
+              <KeyRound className="h-5 w-5 text-primary" />
+              Change Password
+            </CardTitle>
+            {!showPasswordReset && (
+              <Button variant="outline" size="sm" onClick={() => setShowPasswordReset(true)}>
+                Change Password
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        {showPasswordReset && (
+          <CardContent>
+            <form onSubmit={handlePasswordReset} className="space-y-4 max-w-md">
+              <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  placeholder="e.g. Student@123"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  required
+                />
+                <ul className="text-[11px] text-muted-foreground space-y-0.5">
+                  <li className={newPassword.length >= 8 ? 'text-secondary' : ''}>• At least 8 characters</li>
+                  <li className={/[A-Z]/.test(newPassword) ? 'text-secondary' : ''}>• One uppercase letter</li>
+                  <li className={/[a-z]/.test(newPassword) ? 'text-secondary' : ''}>• One lowercase letter</li>
+                  <li className={/[0-9]/.test(newPassword) ? 'text-secondary' : ''}>• One number</li>
+                  <li className={/[^A-Za-z0-9]/.test(newPassword) ? 'text-secondary' : ''}>• One special character</li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  placeholder="Re-enter new password"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  required
+                />
+                {confirmPassword && newPassword !== confirmPassword && (
+                  <p className="text-[11px] text-destructive">Passwords do not match</p>
+                )}
+                {confirmPassword && newPassword === confirmPassword && (
+                  <p className="text-[11px] text-secondary flex items-center gap-1"><CheckCircle className="h-3 w-3" /> Passwords match</p>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <Button type="submit" disabled={resetting} className="shadow-md">
+                  {resetting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
+                  Update Password
+                </Button>
+                <Button type="button" variant="ghost" onClick={() => { setShowPasswordReset(false); setNewPassword(''); setConfirmPassword(''); }}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        )}
+      </Card>
     </div>
   );
 };
