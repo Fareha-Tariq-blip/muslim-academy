@@ -24,7 +24,7 @@ const Header = () => {
   ];
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-[hsl(210,45%,12%)]/95 backdrop-blur-md shadow-lg border-b border-white/10' : 'bg-[hsl(210,45%,12%)]/80 backdrop-blur-sm'}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-[hsl(210,45%,12%)] backdrop-blur-md shadow-lg border-b border-white/10' : 'bg-[hsl(210,45%,12%)]/95 backdrop-blur-sm'}`}>
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <Link to="/" className="flex items-center gap-3">
           <img src={logo} alt="Muslim Academy" className="h-11 w-11 rounded-full object-cover shadow-md" />
@@ -39,7 +39,7 @@ const Header = () => {
             <Link
               key={link.to}
               to={link.to}
-              className={`rounded-md px-4 py-2.5 text-[15px] font-medium transition-all hover:bg-accent/15 ${location.pathname === link.to ? 'text-accent font-semibold bg-accent/10' : 'text-[hsl(40,30%,96%)] hover:text-accent'}`}
+              className={`rounded-md px-4 py-2.5 text-[15px] font-medium transition-all hover:bg-[hsl(174,55%,40%)]/15 ${location.pathname === link.to ? 'text-[hsl(174,55%,55%)] font-semibold bg-[hsl(174,55%,40%)]/10' : 'text-[hsl(40,30%,96%)] hover:text-[hsl(174,55%,55%)]'}`}
             >
               {link.label}
             </Link>
@@ -55,14 +55,14 @@ const Header = () => {
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-border/50 bg-card/95 backdrop-blur-md md:hidden">
+        <div className="border-t border-white/10 bg-[hsl(210,45%,12%)] md:hidden">
           <nav className="container mx-auto flex flex-col gap-1 px-4 py-4">
             {links.map(link => (
               <Link
                 key={link.to}
                 to={link.to}
                 onClick={() => setMobileOpen(false)}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent/10 hover:text-accent ${location.pathname === link.to ? 'text-accent font-semibold bg-accent/10' : ''}`}
+                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-[hsl(174,55%,40%)]/10 hover:text-[hsl(174,55%,55%)] ${location.pathname === link.to ? 'text-[hsl(174,55%,55%)] font-semibold bg-[hsl(174,55%,40%)]/10' : 'text-[hsl(40,30%,96%)]'}`}
               >
                 {link.label}
               </Link>
