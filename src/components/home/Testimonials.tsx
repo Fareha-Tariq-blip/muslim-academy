@@ -12,15 +12,15 @@ const testimonials = [
 
 const Testimonials = () => {
   const [current, setCurrent] = useState(0);
-  const { ref, isVisible } = useScrollAnimation();
+  const { ref, isVisible } = useScrollAnimation(0.15, 'scale');
 
   const next = () => setCurrent((c) => (c + 1) % testimonials.length);
   const prev = () => setCurrent((c) => (c - 1 + testimonials.length) % testimonials.length);
   const t = testimonials[current];
 
   return (
-    <section className="py-20 bg-gradient-to-br from-secondary/10 via-primary/5 to-accent/10" ref={ref}>
-      <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+    <section className="py-20 bg-gradient-to-br from-secondary/15 via-primary/10 to-accent/15" ref={ref}>
+      <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
         <div className="text-center mb-12">
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Testimonials</span>
           <h2 className="font-display text-3xl font-bold text-foreground mt-2 md:text-4xl">
@@ -29,7 +29,7 @@ const Testimonials = () => {
         </div>
 
         <div className="mx-auto max-w-2xl">
-          <div className="relative rounded-2xl border border-accent/30 bg-accent/10 p-8 text-center shadow-sm">
+          <div className="relative rounded-2xl border border-accent/30 bg-accent/10 p-8 text-center shadow-sm animate-pulse-glow">
             <Quote className="mx-auto mb-4 h-10 w-10 text-primary/30" />
             <p className="text-lg text-foreground italic leading-relaxed">"{t.text}"</p>
             <div className="mt-6">
