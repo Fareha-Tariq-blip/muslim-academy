@@ -10,7 +10,8 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 const ContactSection = () => {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [loading, setLoading] = useState(false);
-  const { ref, isVisible } = useScrollAnimation();
+  const { ref: leftRef, isVisible: leftVisible } = useScrollAnimation(0.15, 'left');
+  const { ref: rightRef, isVisible: rightVisible } = useScrollAnimation(0.15, 'right');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +29,8 @@ const ContactSection = () => {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10" id="contact" ref={ref}>
-      <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+    <section className="py-20 bg-gradient-to-br from-primary/15 via-secondary/10 to-accent/15" id="contact">
+      <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Get in Touch</span>
           <h2 className="font-display text-3xl font-bold text-foreground mt-2 md:text-4xl">
@@ -38,7 +39,7 @@ const ContactSection = () => {
         </div>
 
         <div className="grid gap-12 md:grid-cols-2">
-          <div className="space-y-6">
+          <div ref={leftRef} className={`space-y-6 transition-all duration-700 ${leftVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-16'}`}>
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
                 <MapPin className="h-6 w-6" />
@@ -68,14 +69,16 @@ const ContactSection = () => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input placeholder="Your Name" value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} required />
-            <Input type="email" placeholder="Your Email" value={form.email} onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))} required />
-            <Textarea placeholder="Your Message" value={form.message} onChange={(e) => setForm(f => ({ ...f, message: e.target.value }))} rows={5} required />
-            <Button type="submit" className="w-full" disabled={loading}>
-              <Send className="mr-2 h-4 w-4" /> {loading ? 'Sending...' : 'Send Message'}
-            </Button>
-          </form>
+          <div ref={rightRef} className={`transition-all duration-700 ${rightVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-16'}`}>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input placeholder="Your Name" value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} required />
+              <Input type="email" placeholder="Your Email" value={form.email} onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))} required />
+              <Textarea placeholder="Your Message" value={form.message} onChange={(e) => setForm(f => ({ ...f, message: e.target.value }))} rows={5} required />
+              <Button type="submit" className="w-full" disabled={loading}>
+                <Send className="mr-2 h-4 w-4" /> {loading ? 'Sending...' : 'Send Message'}
+              </Button>
+            </form>
+          </div>
         </div>
       </div>
     </section>

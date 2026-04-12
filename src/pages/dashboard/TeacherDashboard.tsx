@@ -7,7 +7,7 @@ import AttendanceMarker from '@/components/teacher/AttendanceMarker';
 import CourseMaterialsManager from '@/components/teacher/CourseMaterialsManager';
 import StudentPerformance from '@/components/teacher/StudentPerformance';
 import GradeManager from '@/components/teacher/GradeManager';
-import StudentAnnouncements from '@/components/student/StudentAnnouncements';
+import TeacherAnnouncements from '@/components/teacher/TeacherAnnouncements';
 import UserProfile from '@/components/dashboard/UserProfile';
 
 const TeacherDashboard = () => (
@@ -21,7 +21,7 @@ const TeacherDashboard = () => (
       <Route path="materials" element={<CourseMaterialsManager />} />
       <Route path="performance" element={<StudentPerformance />} />
       <Route path="grades" element={<GradeManager />} />
-      <Route path="announcements" element={<StudentAnnouncements />} />
+      <Route path="announcements" element={<TeacherAnnouncements />} />
     </Routes>
   </DashboardLayout>
 );

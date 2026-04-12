@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Camera } from 'lucide-react';
+import { useStaggerAnimation } from '@/hooks/useScrollAnimation';
 
 interface GalleryItem {
   id: string;
@@ -19,6 +20,7 @@ const Gallery = () => {
   const [images, setImages] = useState<GalleryItem[]>([]);
   const [selected, setSelected] = useState<GalleryItem | null>(null);
   const [filter, setFilter] = useState('all');
+  const { ref, isVisible, getItemClass, getItemDelay } = useStaggerAnimation();
 
   useEffect(() => {
     const fetch = async () => {
@@ -34,18 +36,21 @@ const Gallery = () => {
   return (
     <div className="min-h-screen">
       <Header />
-      <div className="pt-24 pb-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Our Gallery</span>
-            <h1 className="font-display text-4xl font-bold text-foreground mt-2 md:text-5xl">
-              Academy <span className="text-primary">Gallery</span>
-            </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-              Glimpses of life at Muslim Academy — our classrooms, events, students, and campus.
-            </p>
-          </div>
+      {/* Page header banner */}
+      <div className="page-header-banner pt-24 pb-12">
+        <div className="relative container mx-auto px-4 text-center">
+          <span className="text-sm font-semibold uppercase tracking-wider text-[hsl(174,55%,55%)]">Our Gallery</span>
+          <h1 className="font-display text-4xl font-bold text-[hsl(40,30%,96%)] mt-2 md:text-5xl">
+            Academy Gallery
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-[hsl(40,20%,80%)]">
+            Glimpses of life at Muslim Academy — our classrooms, events, students, and campus.
+          </p>
+        </div>
+      </div>
 
+      <div className="py-12">
+        <div className="container mx-auto px-4">
           {categories.length > 1 && (
             <div className="flex flex-wrap justify-center gap-2 mb-8">
               {categories.map(cat => (
@@ -67,11 +72,12 @@ const Gallery = () => {
               <p className="text-muted-foreground">No gallery images yet. Check back soon!</p>
             </div>
           ) : (
-            <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-              {filtered.map(img => (
+            <div ref={ref} className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
+              {filtered.map((img, i) => (
                 <div
                   key={img.id}
-                  className="group relative overflow-hidden rounded-xl cursor-pointer break-inside-avoid"
+                  className={`group relative overflow-hidden rounded-xl cursor-pointer break-inside-avoid ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
+                  style={getItemDelay(i)}
                   onClick={() => setSelected(img)}
                 >
                   <img
@@ -82,7 +88,7 @@ const Gallery = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl flex items-end p-4">
                     <div>
-                      <p className="text-white font-semibold text-sm">{img.title}</p>
+                      <p className="text-[hsl(40,30%,96%)] font-semibold text-sm">{img.title}</p>
                       <Badge variant="secondary" className="mt-1 text-[10px] capitalize">{img.category}</Badge>
                     </div>
                   </div>

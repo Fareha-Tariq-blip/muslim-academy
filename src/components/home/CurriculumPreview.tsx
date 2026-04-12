@@ -3,7 +3,7 @@ import {
   Code, BookMarked, FlaskConical, Landmark, Languages,
   Lightbulb, MonitorSmartphone, Atom, Leaf
 } from 'lucide-react';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useScrollAnimation, useStaggerAnimation } from '@/hooks/useScrollAnimation';
 
 const subjects = [
   { name: 'Urdu', icon: BookMarked },
@@ -24,12 +24,13 @@ const subjects = [
 ];
 
 const CurriculumPreview = () => {
-  const { ref, isVisible } = useScrollAnimation();
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation(0.15, 'fade');
+  const { ref: gridRef, isVisible: gridVisible, getItemClass, getItemDelay } = useStaggerAnimation();
 
   return (
-    <section className="py-20 bg-gradient-to-b from-accent/10 via-secondary/5 to-primary/10" id="curriculum" ref={ref}>
-      <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-        <div className="text-center mb-12">
+    <section className="py-20 bg-gradient-to-b from-accent/15 via-secondary/10 to-primary/15" id="curriculum">
+      <div className="container mx-auto px-4">
+        <div ref={headerRef} className={`text-center mb-12 transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Our Subjects</span>
           <h2 className="font-display text-3xl font-bold text-foreground mt-2 md:text-4xl">
             Comprehensive <span className="text-primary">Curriculum</span>
@@ -39,12 +40,12 @@ const CurriculumPreview = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <div ref={gridRef} className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {subjects.map((subject, i) => (
             <div
               key={i}
-              className={`group flex flex-col items-center gap-3 rounded-xl border border-accent/30 bg-accent/10 p-5 text-center transition-all duration-500 hover:shadow-lg hover:-translate-y-2 hover:bg-accent/20 cursor-pointer ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-              style={{ transitionDelay: `${i * 50 + 200}ms` }}
+              className={`group flex flex-col items-center gap-3 rounded-xl border border-accent/30 bg-accent/10 p-5 text-center transition-all hover:shadow-lg hover:-translate-y-2 hover:bg-accent/20 cursor-pointer ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
+              style={getItemDelay(i)}
             >
               <div className="rounded-lg p-2 bg-accent text-accent-foreground transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12">
                 <subject.icon className="h-8 w-8" />

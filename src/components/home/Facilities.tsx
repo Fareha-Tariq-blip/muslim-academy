@@ -1,5 +1,5 @@
 import { Microscope, MonitorSmartphone, Library, Dumbbell } from 'lucide-react';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useScrollAnimation, useStaggerAnimation } from '@/hooks/useScrollAnimation';
 
 const facilities = [
   { icon: Microscope, title: 'Science Labs', desc: 'State-of-the-art physics, chemistry, and biology labs with modern equipment for hands-on experiments.' },
@@ -9,26 +9,27 @@ const facilities = [
 ];
 
 const Facilities = () => {
-  const { ref, isVisible } = useScrollAnimation();
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation(0.15, 'scale');
+  const { ref: cardsRef, isVisible: cardsVisible, getItemClass, getItemDelay } = useStaggerAnimation();
 
   return (
-    <section className="py-20 bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10" ref={ref}>
-      <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-        <div className="text-center mb-12">
+    <section className="py-20 bg-gradient-to-br from-primary/15 via-accent/10 to-secondary/15">
+      <div className="container mx-auto px-4">
+        <div ref={headerRef} className={`text-center mb-12 transition-all duration-700 ${headerVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Campus</span>
           <h2 className="font-display text-3xl font-bold text-foreground mt-2 md:text-4xl">
             World-Class <span className="text-primary">Facilities</span>
           </h2>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div ref={cardsRef} className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {facilities.map((f, i) => (
             <div
               key={i}
-              className={`group overflow-hidden rounded-xl border border-accent/30 bg-accent/10 transition-all hover:shadow-xl hover:-translate-y-1 hover:bg-accent/20 duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-              style={{ transitionDelay: `${i * 100 + 200}ms` }}
+              className={`group overflow-hidden rounded-xl border border-accent/30 bg-accent/10 transition-all hover:shadow-xl hover:-translate-y-1 hover:bg-accent/20 ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
+              style={getItemDelay(i)}
             >
-              <div className="flex h-40 items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 transition-colors group-hover:from-primary/10 group-hover:to-secondary/10">
+              <div className="flex h-40 items-center justify-center bg-gradient-to-br from-primary/8 to-secondary/8 transition-colors group-hover:from-primary/15 group-hover:to-secondary/15 animate-shimmer">
                 <f.icon className="h-16 w-16 text-primary/60 transition-transform group-hover:scale-110" />
               </div>
               <div className="p-5">
