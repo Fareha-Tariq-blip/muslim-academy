@@ -9,23 +9,21 @@ export const useScrollAnimation = (threshold = 0.15, direction: AnimationDirecti
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
-      { threshold }
+      { threshold, rootMargin: '50px' }
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, [threshold]);
 
-  const getAnimationClass = (visible: boolean, delay = 0) => {
-    const base = 'transition-all duration-700';
-    const delayStyle = delay ? `transition-delay: ${delay}ms` : '';
-    
+  const getAnimationClass = (visible: boolean) => {
+    const base = 'transition-all duration-700 ease-out will-change-transform';
     if (!visible) {
       switch (direction) {
-        case 'left': return `${base} opacity-0 -translate-x-16`;
-        case 'right': return `${base} opacity-0 translate-x-16`;
-        case 'scale': return `${base} opacity-0 scale-75`;
+        case 'left': return `${base} opacity-0 -translate-x-12`;
+        case 'right': return `${base} opacity-0 translate-x-12`;
+        case 'scale': return `${base} opacity-0 scale-90`;
         case 'fade': return `${base} opacity-0`;
-        default: return `${base} opacity-0 translate-y-10`;
+        default: return `${base} opacity-0 translate-y-8`;
       }
     }
     return `${base} opacity-100 translate-x-0 translate-y-0 scale-100`;
@@ -34,33 +32,33 @@ export const useScrollAnimation = (threshold = 0.15, direction: AnimationDirecti
   return { ref, isVisible, getAnimationClass };
 };
 
-export const useStaggerAnimation = (threshold = 0.15) => {
+export const useStaggerAnimation = (threshold = 0.1) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
-      { threshold }
+      { threshold, rootMargin: '50px' }
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, [threshold]);
 
   const getItemClass = (index: number, direction: AnimationDirection = 'up') => {
-    const base = 'transition-all duration-700';
+    const base = 'transition-all duration-600 ease-out will-change-transform';
     if (!isVisible) {
       switch (direction) {
-        case 'left': return `${base} opacity-0 -translate-x-12`;
-        case 'right': return `${base} opacity-0 translate-x-12`;
-        case 'scale': return `${base} opacity-0 scale-75`;
-        default: return `${base} opacity-0 translate-y-8`;
+        case 'left': return `${base} opacity-0 -translate-x-8`;
+        case 'right': return `${base} opacity-0 translate-x-8`;
+        case 'scale': return `${base} opacity-0 scale-90`;
+        default: return `${base} opacity-0 translate-y-6`;
       }
     }
     return `${base} opacity-100 translate-x-0 translate-y-0 scale-100`;
   };
 
-  const getItemDelay = (index: number) => ({ transitionDelay: `${index * 120 + 150}ms` });
+  const getItemDelay = (index: number) => ({ transitionDelay: `${index * 80 + 100}ms` });
 
   return { ref, isVisible, getItemClass, getItemDelay };
 };

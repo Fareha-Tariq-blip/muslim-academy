@@ -7,13 +7,11 @@ import logo from '@/assets/muslim-academy-logo.png';
 const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Academy background image with premium overlay */}
       <div className="absolute inset-0">
         <img src={academyImg} alt="Muslim Academy Building" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(210,45%,12%)]/85 via-[hsl(210,40%,14%)]/70 to-[hsl(174,55%,40%)]/30 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--navy))]/88 via-[hsl(var(--navy-light))]/72 to-[hsl(var(--teal-dark))]/40" />
       </div>
 
-      {/* Floating elements */}
       <div className="absolute top-20 left-10 animate-float opacity-20">
         <GraduationCap className="h-16 w-16 text-accent" />
       </div>
@@ -27,7 +25,6 @@ const Hero = () => {
         <Sparkles className="h-8 w-8 text-secondary" />
       </div>
 
-      {/* Paper airplane */}
       <div className="absolute top-1/2 animate-fly-across pointer-events-none">
         <svg viewBox="0 0 24 24" className="h-8 w-8 text-accent/40 fill-current" style={{ transform: 'rotate(-30deg)' }}>
           <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
@@ -66,11 +63,11 @@ const Hero = () => {
           <div className="relative animate-slide-up hidden md:block">
             <div className="relative mx-auto h-80 w-80">
               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-accent/20 to-secondary/20 animate-spin-slow" />
-              <div className="absolute inset-4 rounded-full bg-[hsl(40,25%,99%)]/10 backdrop-blur-md flex items-center justify-center border border-[hsl(40,25%,99%)]/20">
+              <div className="absolute inset-4 rounded-full bg-[hsl(40,25%,99%)]/10 flex items-center justify-center border border-[hsl(40,25%,99%)]/20">
                 <div className="text-center space-y-3">
                   <img src={logo} alt="Muslim Academy Logo" className="h-24 w-24 mx-auto rounded-full shadow-lg" />
-                  <p className="font-display text-2xl font-bold text-[hsl(40,30%,96%)]">Since 2008</p>
-                  <p className="text-sm text-[hsl(40,20%,80%)]">15+ Years of Excellence</p>
+                  <p className="font-display text-2xl font-bold text-[hsl(40,30%,96%)]" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>Since 2008</p>
+                  <p className="text-sm text-[hsl(40,20%,80%)]" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>15+ Years of Excellence</p>
                 </div>
               </div>
             </div>
