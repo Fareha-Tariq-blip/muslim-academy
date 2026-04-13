@@ -13,7 +13,7 @@ const Facilities = () => {
   const { ref: cardsRef, isVisible: cardsVisible, getItemClass, getItemDelay } = useStaggerAnimation();
 
   return (
-    <section className="py-20 bg-gradient-to-br from-primary/15 via-accent/10 to-secondary/15">
+    <section className="py-20 section-gradient-1">
       <div className="container mx-auto px-4">
         <div ref={headerRef} className={`text-center mb-12 transition-all duration-700 ${headerVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Campus</span>
@@ -26,11 +26,11 @@ const Facilities = () => {
           {facilities.map((f, i) => (
             <div
               key={i}
-              className={`group overflow-hidden rounded-xl border border-accent/30 bg-accent/10 transition-all hover:shadow-xl hover:-translate-y-1 hover:bg-accent/20 ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
+              className={`group overflow-hidden rounded-xl border border-primary/20 bg-card/80 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
               style={getItemDelay(i)}
             >
-              <div className="flex h-40 items-center justify-center bg-gradient-to-br from-primary/8 to-secondary/8 transition-colors group-hover:from-primary/15 group-hover:to-secondary/15 animate-shimmer">
-                <f.icon className="h-16 w-16 text-primary/60 transition-transform group-hover:scale-110" />
+              <div className="flex h-40 items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10 transition-colors group-hover:from-primary/20 group-hover:to-accent/20">
+                <f.icon className="h-16 w-16 text-primary/70 transition-transform group-hover:scale-110" />
               </div>
               <div className="p-5">
                 <h3 className="font-display text-lg font-semibold text-foreground">{f.title}</h3>

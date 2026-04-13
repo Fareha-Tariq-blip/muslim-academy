@@ -17,6 +17,7 @@ const UserProfile = () => {
 
   // Password reset state
   const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resetting, setResetting] = useState(false);
@@ -38,6 +39,7 @@ const UserProfile = () => {
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!oldPassword) { toast.error('Please enter your current password'); return; }
     if (newPassword.length < 8) { toast.error('Password must be at least 8 characters'); return; }
     if (!/[A-Z]/.test(newPassword)) { toast.error('Password must contain an uppercase letter'); return; }
     if (!/[a-z]/.test(newPassword)) { toast.error('Password must contain a lowercase letter'); return; }
@@ -46,12 +48,24 @@ const UserProfile = () => {
     if (newPassword !== confirmPassword) { toast.error('Passwords do not match'); return; }
 
     setResetting(true);
+    // Verify old password by re-signing in
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user!.email!,
+      password: oldPassword,
+    });
+    if (signInError) {
+      toast.error('Current password is incorrect');
+      setResetting(false);
+      return;
+    }
+
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) {
       toast.error(error.message);
     } else {
       toast.success('Password updated successfully!');
       setShowPasswordReset(false);
+      setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
     }
@@ -188,13 +202,6 @@ const UserProfile = () => {
                   <p className="font-medium text-foreground">Administrator</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 text-sm">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Account ID</p>
-                  <p className="font-medium text-foreground text-xs">{user?.id}</p>
-                </div>
-              </div>
             </CardContent>
           </Card>
         )}
@@ -218,6 +225,17 @@ const UserProfile = () => {
         {showPasswordReset && (
           <CardContent>
             <form onSubmit={handlePasswordReset} className="space-y-4 max-w-md">
+              <div className="space-y-2">
+                <Label htmlFor="old-password">Current Password</Label>
+                <Input
+                  id="old-password"
+                  type="password"
+                  placeholder="Enter your current password"
+                  value={oldPassword}
+                  onChange={e => setOldPassword(e.target.value)}
+                  required
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="new-password">New Password</Label>
                 <Input
@@ -258,7 +276,7 @@ const UserProfile = () => {
                   {resetting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
                   Update Password
                 </Button>
-                <Button type="button" variant="ghost" onClick={() => { setShowPasswordReset(false); setNewPassword(''); setConfirmPassword(''); }}>
+                <Button type="button" variant="ghost" onClick={() => { setShowPasswordReset(false); setOldPassword(''); setNewPassword(''); setConfirmPassword(''); }}>
                   Cancel
                 </Button>
               </div>

@@ -27,12 +27,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     <SidebarProvider>
       <div className="min-h-screen flex flex-col w-full">
         {/* Main header - dark navy */}
-        <header className="sticky top-0 z-50 border-b border-white/10 bg-[hsl(210,45%,12%)]">
-          <div className="flex min-h-[72px] items-center justify-between gap-4 px-4 sm:px-6">
+        <header className="sticky top-0 z-50 border-b border-white/10 bg-[hsl(var(--navy))]">
+          <div className="flex min-h-[80px] items-center justify-between gap-4 px-4 sm:px-6">
             <div className="flex items-center gap-3">
               <SidebarTrigger className="text-[hsl(40,30%,96%)] hover:bg-white/10" />
               <Link to="/" className="flex items-center gap-3">
-                <img src={logo} alt="Muslim Academy" className="h-11 w-11 rounded-full object-cover shadow-md" />
+                <img src={logo} alt="Muslim Academy" className="h-12 w-12 rounded-full object-cover shadow-md" />
                 <div className="hidden sm:block">
                   <span className="font-display text-xl font-bold text-[hsl(40,30%,96%)]">Muslim Academy</span>
                   <p className="text-[11px] uppercase tracking-[0.2em] text-[hsl(40,20%,80%)]">Excellence in Education</p>
@@ -58,7 +58,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <DashboardSidebar />
           <main className="flex-1 overflow-auto flex flex-col">
             {/* Sub-header with gradient */}
-            <section className="border-b border-white/10 bg-gradient-to-r from-[hsl(210,45%,14%)] via-[hsl(210,50%,18%)] to-[hsl(174,40%,20%)] px-6 py-6">
+            <section className="border-b border-white/10 bg-gradient-to-r from-[hsl(var(--navy))] via-[hsl(var(--navy-light))] to-[hsl(var(--teal-dark))] px-6 py-6">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div className="space-y-2">
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[hsl(174,55%,55%)]">Muslim Academy Portal</p>
@@ -71,11 +71,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(174,55%,55%)]">Portal</p>
                     <p className="mt-1 font-display text-xl font-semibold text-[hsl(40,30%,96%)]">{portalLabel}</p>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[hsl(160,50%,50%)]">Status</p>
                     <p className="mt-1 text-sm font-medium text-[hsl(40,30%,96%)]">Signed in and ready to continue</p>
                   </div>

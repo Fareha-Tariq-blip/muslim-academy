@@ -29,7 +29,7 @@ const ContactSection = () => {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-primary/15 via-secondary/10 to-accent/15" id="contact">
+    <section className="py-20 section-gradient-3" id="contact">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Get in Touch</span>
@@ -39,7 +39,7 @@ const ContactSection = () => {
         </div>
 
         <div className="grid gap-12 md:grid-cols-2">
-          <div ref={leftRef} className={`space-y-6 transition-all duration-700 ${leftVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-16'}`}>
+          <div ref={leftRef} className={`space-y-6 transition-all duration-700 ${leftVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`}>
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
                 <MapPin className="h-6 w-6" />
@@ -69,7 +69,7 @@ const ContactSection = () => {
             </div>
           </div>
 
-          <div ref={rightRef} className={`transition-all duration-700 ${rightVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-16'}`}>
+          <div ref={rightRef} className={`transition-all duration-700 ${rightVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`}>
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input placeholder="Your Name" value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} required />
               <Input type="email" placeholder="Your Email" value={form.email} onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))} required />

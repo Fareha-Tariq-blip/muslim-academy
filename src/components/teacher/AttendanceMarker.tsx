@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Check, X, Clock, Users, History } from 'lucide-react';
+import { Loader2, Check, X, Clock, Users, History, Search, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AttendanceMarker = () => {
@@ -24,6 +24,11 @@ const AttendanceMarker = () => {
   const [historyRecords, setHistoryRecords] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [activeTab, setActiveTab] = useState('mark');
+  const [studentSearch, setStudentSearch] = useState('');
+  const [historyDateFilter, setHistoryDateFilter] = useState('');
+  const [historySearch, setHistorySearch] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingStatus, setEditingStatus] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -44,11 +49,7 @@ const AttendanceMarker = () => {
     setStudents([]);
 
     const { data: enrollments } = await supabase.from('enrollments').select('student_id').eq('course_id', courseId);
-    if (!enrollments || enrollments.length === 0) {
-      setStudents([]);
-      setLoadingStudents(false);
-      return;
-    }
+    if (!enrollments || enrollments.length === 0) { setStudents([]); setLoadingStudents(false); return; }
 
     const studentIds = enrollments.map(e => e.student_id);
     const { data: studentsData } = await supabase.from('students').select('*').in('id', studentIds);
@@ -60,17 +61,10 @@ const AttendanceMarker = () => {
       }));
       setStudents(enriched);
 
-      // Load existing attendance for selected date
-      const { data: existing } = await supabase.from('attendance')
-        .select('student_id, status')
-        .eq('course_id', courseId)
-        .eq('date', selectedDate);
-
+      const { data: existing } = await supabase.from('attendance').select('student_id, status').eq('course_id', courseId).eq('date', selectedDate);
       const defaultAttendance: Record<string, string> = {};
       enriched.forEach(s => { defaultAttendance[s.id] = 'present'; });
-      if (existing) {
-        existing.forEach(a => { defaultAttendance[a.student_id] = a.status; });
-      }
+      if (existing) existing.forEach(a => { defaultAttendance[a.student_id] = a.status; });
       setAttendance(defaultAttendance);
     }
     setLoadingStudents(false);
@@ -79,29 +73,18 @@ const AttendanceMarker = () => {
   const loadDateAttendance = async (date: string) => {
     setSelectedDate(date);
     if (!selectedCourse || students.length === 0) return;
-
-    const { data: existing } = await supabase.from('attendance')
-      .select('student_id, status')
-      .eq('course_id', selectedCourse)
-      .eq('date', date);
-
+    const { data: existing } = await supabase.from('attendance').select('student_id, status').eq('course_id', selectedCourse).eq('date', date);
     const defaultAttendance: Record<string, string> = {};
     students.forEach(s => { defaultAttendance[s.id] = 'present'; });
-    if (existing) {
-      existing.forEach(a => { defaultAttendance[a.student_id] = a.status; });
-    }
+    if (existing) existing.forEach(a => { defaultAttendance[a.student_id] = a.status; });
     setAttendance(defaultAttendance);
   };
 
   const saveAttendance = async () => {
     setSaving(true);
     const records = Object.entries(attendance).map(([studentId, status]) => ({
-      student_id: studentId,
-      course_id: selectedCourse,
-      date: selectedDate,
-      status,
+      student_id: studentId, course_id: selectedCourse, date: selectedDate, status,
     }));
-
     const { error } = await supabase.from('attendance').upsert(records, { onConflict: 'student_id,course_id,date' });
     if (error) toast.error(error.message);
     else toast.success('Attendance saved!');
@@ -111,14 +94,8 @@ const AttendanceMarker = () => {
   const loadHistory = async () => {
     if (!selectedCourse) { toast.error('Select a course first'); return; }
     setLoadingHistory(true);
-    const { data } = await supabase.from('attendance')
-      .select('*')
-      .eq('course_id', selectedCourse)
-      .order('date', { ascending: false })
-      .limit(200);
-
+    const { data } = await supabase.from('attendance').select('*').eq('course_id', selectedCourse).order('date', { ascending: false }).limit(200);
     if (data) {
-      // Group by date and enrich with student names
       const enriched = await Promise.all(data.map(async (r) => {
         const student = students.find(s => s.id === r.student_id);
         return { ...r, full_name: student?.full_name || 'Unknown', roll_number: student?.roll_number || '' };
@@ -127,6 +104,20 @@ const AttendanceMarker = () => {
     }
     setLoadingHistory(false);
   };
+
+  const saveHistoryEdit = async (id: string) => {
+    const { error } = await supabase.from('attendance').update({ status: editingStatus }).eq('id', id);
+    if (error) toast.error(error.message);
+    else { toast.success('Updated'); setEditingId(null); loadHistory(); }
+  };
+
+  const filteredStudents = students.filter(s => s.full_name.toLowerCase().includes(studentSearch.toLowerCase()));
+
+  const filteredHistory = historyRecords.filter(r => {
+    const matchesDate = !historyDateFilter || r.date === historyDateFilter;
+    const matchesSearch = !historySearch || r.full_name.toLowerCase().includes(historySearch.toLowerCase());
+    return matchesDate && matchesSearch;
+  });
 
   if (loading) return <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
@@ -152,52 +143,40 @@ const AttendanceMarker = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="mark">Mark Attendance</TabsTrigger>
-            <TabsTrigger value="history" onClick={loadHistory}>
-              <History className="mr-1 h-4 w-4" /> History
-            </TabsTrigger>
+            <TabsTrigger value="history" onClick={loadHistory}><History className="mr-1 h-4 w-4" /> History</TabsTrigger>
           </TabsList>
 
           <TabsContent value="mark">
+            <div className="mb-3">
+              <div className="relative max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search student..." value={studentSearch} onChange={e => setStudentSearch(e.target.value)} className="pl-9" />
+              </div>
+            </div>
             {loadingStudents ? (
               <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-            ) : students.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground font-medium">No students enrolled</p>
-                </CardContent>
-              </Card>
+            ) : filteredStudents.length === 0 ? (
+              <Card><CardContent className="p-8 text-center"><Users className="h-12 w-12 text-muted-foreground mx-auto mb-3" /><p className="text-muted-foreground font-medium">No students found</p></CardContent></Card>
             ) : (
               <Card>
                 <CardHeader>
                   <CardTitle className="font-display flex items-center justify-between">
                     <span>Attendance - {new Date(selectedDate + 'T00:00').toLocaleDateString()}</span>
-                    <Button onClick={saveAttendance} disabled={saving}>
-                      {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save
-                    </Button>
+                    <Button onClick={saveAttendance} disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save</Button>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Student</TableHead>
-                        <TableHead>Roll No.</TableHead>
-                        <TableHead className="text-center">Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
+                    <TableHeader><TableRow><TableHead>Student</TableHead><TableHead>Roll No.</TableHead><TableHead className="text-center">Status</TableHead></TableRow></TableHeader>
                     <TableBody>
-                      {students.map(s => (
+                      {filteredStudents.map(s => (
                         <TableRow key={s.id}>
                           <TableCell className="font-medium">{s.full_name}</TableCell>
                           <TableCell>{s.roll_number}</TableCell>
                           <TableCell>
                             <div className="flex justify-center gap-2">
                               {['present', 'absent', 'late'].map(status => (
-                                <Button
-                                  key={status}
-                                  size="sm"
-                                  variant={attendance[s.id] === status ? 'default' : 'outline'}
+                                <Button key={status} size="sm" variant={attendance[s.id] === status ? 'default' : 'outline'}
                                   className={attendance[s.id] === status ? (status === 'present' ? 'bg-green-600 hover:bg-green-700' : status === 'absent' ? 'bg-destructive hover:bg-destructive/90' : 'bg-yellow-500 hover:bg-yellow-600') : ''}
                                   onClick={() => setAttendance(a => ({ ...a, [s.id]: status }))}
                                 >
@@ -217,37 +196,53 @@ const AttendanceMarker = () => {
           </TabsContent>
 
           <TabsContent value="history">
+            <div className="flex flex-wrap gap-3 mb-4">
+              <Input type="date" value={historyDateFilter} onChange={e => setHistoryDateFilter(e.target.value)} className="w-44" placeholder="Filter by date" />
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search student..." value={historySearch} onChange={e => setHistorySearch(e.target.value)} className="pl-9" />
+              </div>
+            </div>
             {loadingHistory ? (
               <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-            ) : historyRecords.length === 0 ? (
+            ) : filteredHistory.length === 0 ? (
               <Card><CardContent className="p-8 text-center text-muted-foreground">No attendance history found</CardContent></Card>
             ) : (
               <Card>
                 <CardContent className="p-0">
                   <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Student</TableHead>
-                        <TableHead>Roll No</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
+                    <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Student</TableHead><TableHead>Roll No</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Edit</TableHead></TableRow></TableHeader>
                     <TableBody>
-                      {historyRecords.map(r => (
+                      {filteredHistory.map(r => (
                         <TableRow key={r.id}>
                           <TableCell>{new Date(r.date + 'T00:00').toLocaleDateString()}</TableCell>
                           <TableCell className="font-medium">{r.full_name}</TableCell>
                           <TableCell>{r.roll_number}</TableCell>
                           <TableCell>
-                            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                              r.status === 'present' ? 'bg-green-100 text-green-700' :
-                              r.status === 'absent' ? 'bg-red-100 text-red-700' :
-                              'bg-yellow-100 text-yellow-700'
-                            }`}>
-                              {r.status === 'present' ? <Check className="h-3 w-3" /> : r.status === 'absent' ? <X className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-                              {r.status}
-                            </span>
+                            {editingId === r.id ? (
+                              <Select value={editingStatus} onValueChange={setEditingStatus}>
+                                <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="present">Present</SelectItem>
+                                  <SelectItem value="absent">Absent</SelectItem>
+                                  <SelectItem value="late">Late</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${r.status === 'present' ? 'bg-green-100 text-green-700' : r.status === 'absent' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                {r.status === 'present' ? <Check className="h-3 w-3" /> : r.status === 'absent' ? <X className="h-3 w-3" /> : <Clock className="h-3 w-3" />}{r.status}
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {editingId === r.id ? (
+                              <div className="flex justify-end gap-1">
+                                <Button size="sm" onClick={() => saveHistoryEdit(r.id)}>Save</Button>
+                                <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
+                              </div>
+                            ) : (
+                              <Button variant="ghost" size="icon" onClick={() => { setEditingId(r.id); setEditingStatus(r.status); }}><Pencil className="h-4 w-4 text-primary" /></Button>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}

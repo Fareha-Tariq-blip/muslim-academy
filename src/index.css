@@ -49,6 +49,11 @@
     --warning: 38 92% 50%;
     --info: 174 55% 40%;
 
+    /* Navy theme token */
+    --navy: 210 45% 12%;
+    --navy-light: 210 50% 18%;
+    --teal-dark: 174 40% 22%;
+
     --gradient-hero: linear-gradient(135deg, hsl(210 70% 42% / 0.08), hsl(160 50% 38% / 0.08), hsl(40 30% 96% / 0.05));
     --gradient-section: linear-gradient(180deg, hsl(40 30% 96%), hsl(210 70% 42% / 0.04), hsl(40 30% 96%));
   }
@@ -129,15 +134,15 @@
   background: hsl(var(--primary) / 0.5);
 }
 
-/* Premium section backgrounds - enhanced visibility */
+/* Premium section backgrounds - ENHANCED for visibility */
 .section-gradient-1 {
-  background: linear-gradient(135deg, hsl(210 70% 42% / 0.12), hsl(174 55% 40% / 0.14), hsl(40 30% 93% / 0.4));
+  background: linear-gradient(135deg, hsl(210 70% 42% / 0.22), hsl(174 55% 40% / 0.20), hsl(40 30% 90% / 0.5));
 }
 .section-gradient-2 {
-  background: linear-gradient(135deg, hsl(160 50% 38% / 0.12), hsl(40 30% 85% / 0.3), hsl(174 55% 40% / 0.08));
+  background: linear-gradient(135deg, hsl(160 50% 38% / 0.22), hsl(40 30% 82% / 0.4), hsl(174 55% 40% / 0.15));
 }
 .section-gradient-3 {
-  background: linear-gradient(135deg, hsl(174 55% 40% / 0.12), hsl(210 70% 42% / 0.14), hsl(160 50% 38% / 0.08));
+  background: linear-gradient(135deg, hsl(174 55% 40% / 0.22), hsl(210 70% 42% / 0.20), hsl(160 50% 38% / 0.15));
 }
 
 /* Subtle geometric pattern overlay for sections */
@@ -196,9 +201,9 @@
 }
 .animate-pulse-glow { animation: pulse-glow 4s ease-in-out infinite; }
 
-/* Page header banner for standalone pages */
+/* Page header banner for standalone pages — DARK NAVY matching dashboard */
 .page-header-banner {
-  background: linear-gradient(135deg, hsl(210 45% 12%) 0%, hsl(210 50% 18%) 50%, hsl(174 40% 22%) 100%);
+  background: linear-gradient(135deg, hsl(var(--navy)) 0%, hsl(var(--navy-light)) 50%, hsl(var(--teal-dark)) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -210,4 +215,9 @@
     radial-gradient(circle at 20% 50%, hsl(174 55% 40% / 0.15), transparent 50%),
     radial-gradient(circle at 80% 50%, hsl(210 70% 42% / 0.12), transparent 50%);
   pointer-events: none;
+}
+
+/* Dashboard panel background - standardized dark navy */
+.dashboard-bg {
+  background: hsl(var(--navy));
 }

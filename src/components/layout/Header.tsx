@@ -24,10 +24,10 @@ const Header = () => {
   ];
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-[hsl(210,45%,12%)] backdrop-blur-md shadow-lg border-b border-white/10' : 'bg-[hsl(210,45%,12%)]/95 backdrop-blur-sm'}`}>
-      <div className="container mx-auto flex items-center justify-between px-4 py-4">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-[hsl(var(--navy))] ${isScrolled ? 'shadow-lg border-b border-white/10' : ''}`}>
+      <div className="container mx-auto flex items-center justify-between px-4 py-5">
         <Link to="/" className="flex items-center gap-3">
-          <img src={logo} alt="Muslim Academy" className="h-11 w-11 rounded-full object-cover shadow-md" />
+          <img src={logo} alt="Muslim Academy" className="h-12 w-12 rounded-full object-cover shadow-md" />
           <div>
             <h1 className="font-display text-xl font-bold leading-tight text-[hsl(40,30%,96%)]">Muslim Academy</h1>
             <p className="text-[11px] leading-none text-[hsl(40,20%,80%)]">Excellence in Education</p>
@@ -55,7 +55,7 @@ const Header = () => {
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-white/10 bg-[hsl(210,45%,12%)] md:hidden">
+        <div className="border-t border-white/10 bg-[hsl(var(--navy))] md:hidden">
           <nav className="container mx-auto flex flex-col gap-1 px-4 py-4">
             {links.map(link => (
               <Link

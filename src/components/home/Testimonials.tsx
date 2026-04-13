@@ -19,7 +19,7 @@ const Testimonials = () => {
   const t = testimonials[current];
 
   return (
-    <section className="py-20 bg-gradient-to-br from-secondary/15 via-primary/10 to-accent/15" ref={ref}>
+    <section className="py-20 section-gradient-2" ref={ref}>
       <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
         <div className="text-center mb-12">
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Testimonials</span>
@@ -29,7 +29,7 @@ const Testimonials = () => {
         </div>
 
         <div className="mx-auto max-w-2xl">
-          <div className="relative rounded-2xl border border-accent/30 bg-accent/10 p-8 text-center shadow-sm animate-pulse-glow">
+          <div className="relative rounded-2xl border border-primary/20 bg-card/80 p-8 text-center shadow-lg">
             <Quote className="mx-auto mb-4 h-10 w-10 text-primary/30" />
             <p className="text-lg text-foreground italic leading-relaxed">"{t.text}"</p>
             <div className="mt-6">

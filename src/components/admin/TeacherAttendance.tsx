@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Calendar, Search } from 'lucide-react';
+import { Loader2, Calendar, Search, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -25,6 +25,8 @@ const TeacherAttendance = () => {
   const [search, setSearch] = useState('');
   const [historyTeacher, setHistoryTeacher] = useState<string | null>(null);
   const [history, setHistory] = useState<any[]>([]);
+  const [editingHistoryId, setEditingHistoryId] = useState<string | null>(null);
+  const [editingHistoryStatus, setEditingHistoryStatus] = useState('');
 
   const fetchTeachers = async () => {
     setLoading(true);
@@ -73,6 +75,16 @@ const TeacherAttendance = () => {
     setHistory(data || []);
   };
 
+  const saveHistoryEdit = async (id: string) => {
+    const { error } = await supabase.from('teacher_attendance').update({ status: editingHistoryStatus }).eq('id', id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success('Attendance updated');
+      setEditingHistoryId(null);
+      if (historyTeacher) viewHistory(historyTeacher);
+    }
+  };
+
   const filtered = teachers.filter(t => t.name.toLowerCase().includes(search.toLowerCase()));
 
   if (loading) return <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -114,9 +126,7 @@ const TeacherAttendance = () => {
                   <TableCell>{t.subject}</TableCell>
                   <TableCell>
                     <Select value={attendance[t.id] || 'present'} onValueChange={v => setStatus(t.id, v)}>
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
+                      <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="present">Present</SelectItem>
                         <SelectItem value="absent">Absent</SelectItem>
@@ -151,16 +161,40 @@ const TeacherAttendance = () => {
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Edit</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {history.length === 0 ? (
-                  <TableRow><TableCell colSpan={2} className="text-center text-muted-foreground py-6">No records found</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-6">No records found</TableCell></TableRow>
                 ) : history.map(h => (
                   <TableRow key={h.id}>
                     <TableCell>{format(new Date(h.date + 'T00:00:00'), 'MMM d, yyyy')}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={statusColors[h.status] || ''}>{h.status.charAt(0).toUpperCase() + h.status.slice(1)}</Badge>
+                      {editingHistoryId === h.id ? (
+                        <Select value={editingHistoryStatus} onValueChange={setEditingHistoryStatus}>
+                          <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="present">Present</SelectItem>
+                            <SelectItem value="absent">Absent</SelectItem>
+                            <SelectItem value="leave">Leave</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Badge variant="outline" className={statusColors[h.status] || ''}>{h.status.charAt(0).toUpperCase() + h.status.slice(1)}</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {editingHistoryId === h.id ? (
+                        <div className="flex justify-end gap-1">
+                          <Button size="sm" onClick={() => saveHistoryEdit(h.id)}>Save</Button>
+                          <Button size="sm" variant="ghost" onClick={() => setEditingHistoryId(null)}>Cancel</Button>
+                        </div>
+                      ) : (
+                        <Button variant="ghost" size="icon" onClick={() => { setEditingHistoryId(h.id); setEditingHistoryStatus(h.status); }}>
+                          <Pencil className="h-4 w-4 text-primary" />
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
