@@ -5,14 +5,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Upload } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2, Upload, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 
 const StudentAssignments = () => {
   const { user } = useAuth();
   const [assignments, setAssignments] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
   const [studentId, setStudentId] = useState('');
   const [loading, setLoading] = useState(true);
+  const [courseFilter, setCourseFilter] = useState('all');
 
   useEffect(() => {
     if (!user) return;
@@ -23,11 +26,12 @@ const StudentAssignments = () => {
       const { data: enrollments } = await supabase.from('enrollments').select('course_id').eq('student_id', s.id);
       if (enrollments?.length) {
         const courseIds = enrollments.map(e => e.course_id);
+        const { data: coursesData } = await supabase.from('courses').select('id, name, class, section').in('id', courseIds);
+        setCourses(coursesData || []);
         const { data: assignmentsData } = await supabase.from('assignments').select('*').in('course_id', courseIds).order('due_date', { ascending: true });
         const { data: subs } = await supabase.from('assignment_submissions').select('*').eq('student_id', s.id);
         setAssignments((assignmentsData || []).map(a => ({
-          ...a,
-          submission: (subs || []).find(sub => sub.assignment_id === a.id),
+          ...a, submission: (subs || []).find(sub => sub.assignment_id === a.id),
         })));
       }
       setLoading(false);
@@ -40,14 +44,12 @@ const StudentAssignments = () => {
     const { error: uploadError } = await supabase.storage.from('submissions').upload(filePath, file);
     if (uploadError) { toast.error('Upload failed'); return; }
     const { data: urlData } = supabase.storage.from('submissions').getPublicUrl(filePath);
-
     const { error } = await supabase.from('assignment_submissions').insert({
       assignment_id: assignmentId, student_id: studentId, file_url: urlData.publicUrl,
     });
     if (error) toast.error(error.message);
     else {
       toast.success('Submitted!');
-      // Refresh
       const { data: enrollments } = await supabase.from('enrollments').select('course_id').eq('student_id', studentId);
       if (enrollments?.length) {
         const courseIds = enrollments.map(e => e.course_id);
@@ -60,15 +62,34 @@ const StudentAssignments = () => {
 
   if (loading) return <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
+  const getCourseName = (id: string) => {
+    const c = courses.find(c => c.id === id);
+    return c ? `${c.name}` : '';
+  };
+
+  const filtered = courseFilter === 'all' ? assignments : assignments.filter(a => a.course_id === courseFilter);
+
   return (
     <div className="space-y-6">
       <h2 className="font-display text-2xl font-bold text-foreground">Assignments</h2>
+
+      {courses.length > 0 && (
+        <Select value={courseFilter} onValueChange={setCourseFilter}>
+          <SelectTrigger className="w-56"><Filter className="mr-2 h-4 w-4" /><SelectValue placeholder="All courses" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Courses</SelectItem>
+            {courses.map(c => <SelectItem key={c.id} value={c.id}>{c.name} ({c.class}-{c.section})</SelectItem>)}
+          </SelectContent>
+        </Select>
+      )}
+
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>
+                <TableHead>Course</TableHead>
                 <TableHead>Due Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Marks</TableHead>
@@ -76,11 +97,12 @@ const StudentAssignments = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {assignments.length === 0 ? (
-                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No assignments</TableCell></TableRow>
-              ) : assignments.map(a => (
+              {filtered.length === 0 ? (
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No assignments</TableCell></TableRow>
+              ) : filtered.map(a => (
                 <TableRow key={a.id}>
                   <TableCell className="font-medium">{a.title}</TableCell>
+                  <TableCell className="text-sm">{getCourseName(a.course_id)}</TableCell>
                   <TableCell>{a.due_date ? new Date(a.due_date).toLocaleDateString() : '-'}</TableCell>
                   <TableCell>{a.submission ? (a.submission.graded ? '✅ Graded' : '📤 Submitted') : '⏳ Pending'}</TableCell>
                   <TableCell>{a.submission?.marks ?? '-'}</TableCell>
