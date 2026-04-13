@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, Pencil, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Pencil, Loader2, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -19,6 +19,7 @@ const CourseManagement = () => {
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', description: '', teacher_id: '', class: '1', section: 'A' });
+  const [subjectFilter, setSubjectFilter] = useState('all');
 
   const fetchData = async () => {
     setLoading(true);
@@ -32,10 +33,10 @@ const CourseManagement = () => {
           const t = teachersRes.data?.find(t => t.id === c.teacher_id);
           if (t) {
             const { data: p } = await supabase.from('profiles').select('full_name').eq('user_id', t.user_id).single();
-            return { ...c, teacher_name: p?.full_name || 'Unknown' };
+            return { ...c, teacher_name: p?.full_name || 'Unknown', teacher_subject: t.subject };
           }
         }
-        return { ...c, teacher_name: 'Unassigned' };
+        return { ...c, teacher_name: 'Unassigned', teacher_subject: '' };
       }));
       setCourses(enriched);
     }
@@ -51,6 +52,8 @@ const CourseManagement = () => {
 
   useEffect(() => { fetchData(); }, []);
 
+  const subjects = ['all', ...new Set(courses.map(c => c.name).filter(Boolean))];
+
   const resetForm = () => {
     setForm({ name: '', description: '', teacher_id: '', class: '1', section: 'A' });
     setEditingId(null);
@@ -58,11 +61,8 @@ const CourseManagement = () => {
 
   const handleOpenEdit = (c: any) => {
     setForm({
-      name: c.name,
-      description: c.description || '',
-      teacher_id: c.teacher_id || '',
-      class: c.class,
-      section: c.section,
+      name: c.name, description: c.description || '', teacher_id: c.teacher_id || '',
+      class: c.class, section: c.section,
     });
     setEditingId(c.id);
     setDialogOpen(true);
@@ -71,33 +71,19 @@ const CourseManagement = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-
     const payload = {
-      name: form.name,
-      description: form.description || null,
-      teacher_id: form.teacher_id || null,
-      class: form.class,
-      section: form.section,
+      name: form.name, description: form.description || null,
+      teacher_id: form.teacher_id || null, class: form.class, section: form.section,
     };
 
     if (editingId) {
       const { error } = await supabase.from('courses').update(payload).eq('id', editingId);
       if (error) toast.error(error.message);
-      else {
-        toast.success('Course updated');
-        setDialogOpen(false);
-        resetForm();
-        fetchData();
-      }
+      else { toast.success('Course updated'); setDialogOpen(false); resetForm(); fetchData(); }
     } else {
       const { error } = await supabase.from('courses').insert(payload);
       if (error) toast.error(error.message);
-      else {
-        toast.success('Course created');
-        setDialogOpen(false);
-        resetForm();
-        fetchData();
-      }
+      else { toast.success('Course created'); setDialogOpen(false); resetForm(); fetchData(); }
     }
     setSaving(false);
   };
@@ -109,9 +95,11 @@ const CourseManagement = () => {
     fetchData();
   };
 
+  const filtered = subjectFilter === 'all' ? courses : courses.filter(c => c.name === subjectFilter);
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <h2 className="font-display text-2xl font-bold text-foreground">Course Management</h2>
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
@@ -159,6 +147,19 @@ const CourseManagement = () => {
         </Dialog>
       </div>
 
+      {/* Subject Filter */}
+      <div className="flex gap-3">
+        <Select value={subjectFilter} onValueChange={setSubjectFilter}>
+          <SelectTrigger className="w-56">
+            <Filter className="mr-2 h-4 w-4" />
+            <SelectValue placeholder="Filter by subject" />
+          </SelectTrigger>
+          <SelectContent>
+            {subjects.map(s => <SelectItem key={s} value={s}>{s === 'all' ? 'All Courses' : s}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+
       <Card>
         <CardContent className="p-0">
           {loading ? (
@@ -175,10 +176,10 @@ const CourseManagement = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {courses.length === 0 ? (
+                {filtered.length === 0 ? (
                   <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No courses found</TableCell></TableRow>
                 ) : (
-                  courses.map(c => (
+                  filtered.map(c => (
                     <TableRow key={c.id}>
                       <TableCell className="font-medium">{c.name}</TableCell>
                       <TableCell>{c.teacher_name}</TableCell>

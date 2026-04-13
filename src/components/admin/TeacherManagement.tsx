@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Trash2, Pencil, Loader2, Search } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Trash2, Pencil, Loader2, Search, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { validateAcademyEmail, validatePassword } from '@/lib/validation';
 
@@ -17,6 +18,7 @@ const TeacherManagement = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
+  const [subjectFilter, setSubjectFilter] = useState('all');
   const [form, setForm] = useState({ full_name: '', email: '', password: '', subject: '', qualification: '', phone: '' });
   const [editForm, setEditForm] = useState({ id: '', subject: '', qualification: '', phone: '', full_name: '', profile_id: '' });
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
@@ -35,6 +37,8 @@ const TeacherManagement = () => {
   };
 
   useEffect(() => { fetchTeachers(); }, []);
+
+  const subjects = ['all', ...new Set(teachers.map(t => t.subject).filter(Boolean))];
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,7 +99,6 @@ const TeacherManagement = () => {
     if (!confirm('Delete this teacher? This will also remove their login account.')) return;
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData.session?.access_token;
-    // Delete from auth first
     const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-user`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -109,10 +112,12 @@ const TeacherManagement = () => {
     fetchTeachers();
   };
 
-  const filtered = teachers.filter(t =>
-    (t.profile?.full_name || '').toLowerCase().includes(search.toLowerCase()) ||
-    t.subject.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = teachers.filter(t => {
+    const matchesSearch = (t.profile?.full_name || '').toLowerCase().includes(search.toLowerCase()) ||
+      t.subject.toLowerCase().includes(search.toLowerCase());
+    const matchesSubject = subjectFilter === 'all' || t.subject === subjectFilter;
+    return matchesSearch && matchesSubject;
+  });
 
   return (
     <div className="space-y-6">
@@ -152,10 +157,21 @@ const TeacherManagement = () => {
         </Dialog>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search by name or subject..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+      {/* Search + Subject filter */}
+      <div className="flex flex-wrap gap-3">
+        <div className="relative flex-1 min-w-[200px] max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search by name or subject..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+        </div>
+        <Select value={subjectFilter} onValueChange={setSubjectFilter}>
+          <SelectTrigger className="w-48">
+            <Filter className="mr-2 h-4 w-4" />
+            <SelectValue placeholder="Filter by subject" />
+          </SelectTrigger>
+          <SelectContent>
+            {subjects.map(s => <SelectItem key={s} value={s}>{s === 'all' ? 'All Subjects' : s}</SelectItem>)}
+          </SelectContent>
+        </Select>
       </div>
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
