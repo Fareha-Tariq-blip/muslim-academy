@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,11 +8,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Quote, Send, Loader2, ImagePlus } from 'lucide-react';
+import { Quote, Send, Loader2, ImagePlus, LogIn } from 'lucide-react';
 import { toast } from 'sonner';
 import { useScrollAnimation, useStaggerAnimation } from '@/hooks/useScrollAnimation';
+import { Link } from 'react-router-dom';
 
 const CommunityReviews = () => {
+  const { user } = useAuth();
   const [reviews, setReviews] = useState<any[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -22,7 +25,7 @@ const CommunityReviews = () => {
 
   useEffect(() => {
     const fetchReviews = async () => {
-      const { data } = await supabase.from('reviews').select('*').eq('approved', true).order('created_at', { ascending: false }).limit(6);
+      const { data } = await supabase.from('reviews').select('*').eq('approved', true).order('created_at', { ascending: false }).limit(12);
       setReviews(data || []);
     };
     fetchReviews();
@@ -30,6 +33,7 @@ const CommunityReviews = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) { toast.error('You must be logged in to post a review'); return; }
     setSaving(true);
     let imageUrl: string | null = null;
 
@@ -44,7 +48,7 @@ const CommunityReviews = () => {
     }
 
     const { error } = await supabase.from('reviews').insert({
-      name: form.name, role: form.role, content: form.content, image_url: imageUrl,
+      name: form.name, role: form.role, content: form.content, image_url: imageUrl, user_id: user.id,
     });
 
     if (error) toast.error(error.message);
@@ -58,7 +62,7 @@ const CommunityReviews = () => {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-accent/15 via-secondary/10 to-primary/15">
+    <section className="py-20 section-gradient-3">
       <div className="container mx-auto px-4">
         <div ref={headerRef} className={`text-center mb-12 transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Community</span>
@@ -75,7 +79,7 @@ const CommunityReviews = () => {
             {reviews.map((r, i) => (
               <Card
                 key={r.id}
-                className={`overflow-hidden border-accent/30 bg-accent/10 transition-all hover:shadow-xl hover:-translate-y-1 ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
+                className={`overflow-hidden border-primary/20 bg-card/80 transition-all hover:shadow-xl hover:-translate-y-1 ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
                 style={getItemDelay(i)}
               >
                 {r.image_url && <img src={r.image_url} alt="" className="w-full h-48 object-cover" />}
@@ -102,49 +106,57 @@ const CommunityReviews = () => {
         )}
 
         <div className="text-center">
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="lg" className="gap-2">
-                <Send className="h-4 w-4" /> Share Your Experience
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>Write a Review</DialogTitle></DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Your Name</Label>
-                  <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>You are a</Label>
-                  <Select value={form.role} onValueChange={v => setForm(f => ({ ...f, role: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="parent">Parent</SelectItem>
-                      <SelectItem value="student">Student</SelectItem>
-                      <SelectItem value="alumni">Alumni</SelectItem>
-                      <SelectItem value="community member">Community Member</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Your Review</Label>
-                  <Textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} placeholder="Share your experience..." rows={4} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Photo (optional)</Label>
-                  <div className="flex items-center gap-2">
-                    <Input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] || null)} className="flex-1" />
-                    {file && <ImagePlus className="h-4 w-4 text-muted-foreground" />}
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground">Your review will be visible after admin approval.</p>
-                <Button type="submit" className="w-full" disabled={saving}>
-                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Submit Review
+          {user ? (
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="lg" className="gap-2">
+                  <Send className="h-4 w-4" /> Share Your Experience
                 </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader><DialogTitle>Write a Review</DialogTitle></DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Your Name</Label>
+                    <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>You are a</Label>
+                    <Select value={form.role} onValueChange={v => setForm(f => ({ ...f, role: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="parent">Parent</SelectItem>
+                        <SelectItem value="student">Student</SelectItem>
+                        <SelectItem value="alumni">Alumni</SelectItem>
+                        <SelectItem value="community member">Community Member</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Your Review</Label>
+                    <Textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} placeholder="Share your experience..." rows={4} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Photo (optional)</Label>
+                    <div className="flex items-center gap-2">
+                      <Input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] || null)} className="flex-1" />
+                      {file && <ImagePlus className="h-4 w-4 text-muted-foreground" />}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Your review will be visible after admin approval.</p>
+                  <Button type="submit" className="w-full" disabled={saving}>
+                    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Submit Review
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          ) : (
+            <Link to="/login">
+              <Button size="lg" className="gap-2">
+                <LogIn className="h-4 w-4" /> Login to Share Your Experience
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </section>
