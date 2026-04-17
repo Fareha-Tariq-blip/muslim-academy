@@ -8,6 +8,7 @@ import StudentAttendance from '@/components/student/StudentAttendance';
 import StudentGrades from '@/components/student/StudentGrades';
 import StudentAnnouncements from '@/components/student/StudentAnnouncements';
 import StudentRemarks from '@/components/student/StudentRemarks';
+import CommunityPosts from '@/components/community/CommunityPosts';
 import UserProfile from '@/components/dashboard/UserProfile';
 
 const StudentDashboard = () => (
@@ -22,6 +23,7 @@ const StudentDashboard = () => (
       <Route path="grades" element={<StudentGrades />} />
       <Route path="announcements" element={<StudentAnnouncements />} />
       <Route path="remarks" element={<StudentRemarks />} />
+      <Route path="community" element={<CommunityPosts />} />
     </Routes>
   </DashboardLayout>
 );
