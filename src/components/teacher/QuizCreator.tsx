@@ -151,7 +151,8 @@ const QuizCreator = () => {
       course_id: form.course_id,
       total_marks: totalMarks,
       created_by: user?.id,
-    }).select().single();
+      due_date: form.due_date || null,
+    } as any).select().single();
 
     if (error || !quiz) { toast.error(error?.message || 'Failed'); setSaving(false); return; }
 
@@ -167,7 +168,7 @@ const QuizCreator = () => {
     toast.success('Quiz created!');
     setDialogOpen(false);
     setQuestions([]);
-    setForm({ title: '', course_id: '', total_marks: '10' });
+    setForm({ title: '', course_id: '', total_marks: '10', due_date: '' });
     setAiMaterialFile(null);
     setAiQuestionCount('5');
     setAiTopic('');
@@ -206,6 +207,10 @@ const QuizCreator = () => {
                     <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                     <SelectContent>{courses.map(c => <SelectItem key={c.id} value={c.id}>{c.name} (Class {c.class} - {c.section})</SelectItem>)}</SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label>Due Date (optional — students can't submit after this)</Label>
+                  <Input type="datetime-local" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} />
                 </div>
               </div>
 
