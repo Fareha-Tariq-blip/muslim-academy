@@ -162,6 +162,16 @@ const AssignmentManager = () => {
         </Dialog>
       </div>
 
+      {courses.length > 0 && (
+        <Select value={courseFilter} onValueChange={setCourseFilter}>
+          <SelectTrigger className="w-64"><Filter className="mr-2 h-4 w-4" /><SelectValue placeholder="Filter by subject" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Subjects</SelectItem>
+            {courses.map(c => <SelectItem key={c.id} value={c.id}>{c.name} (Class {c.class}-{c.section})</SelectItem>)}
+          </SelectContent>
+        </Select>
+      )}
+
       <Card>
         <CardContent className="p-0">
           {loading ? (
@@ -177,10 +187,10 @@ const AssignmentManager = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {assignments.length === 0 ? (
+                {(courseFilter === 'all' ? assignments : assignments.filter(a => a.course_id === courseFilter)).length === 0 ? (
                   <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No assignments</TableCell></TableRow>
                 ) : (
-                  assignments.map(a => (
+                  (courseFilter === 'all' ? assignments : assignments.filter(a => a.course_id === courseFilter)).map(a => (
                     <TableRow key={a.id}>
                       <TableCell className="font-medium">{a.title}</TableCell>
                       <TableCell>{a.due_date ? new Date(a.due_date).toLocaleDateString() : 'No deadline'}</TableCell>
