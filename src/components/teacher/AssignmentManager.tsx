@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Loader2, Upload, FileText, Save } from 'lucide-react';
+import { Plus, Loader2, Upload, FileText, Save, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AssignmentManager = () => {
@@ -27,6 +27,7 @@ const AssignmentManager = () => {
   const [form, setForm] = useState({ title: '', description: '', course_id: '', due_date: '' });
   const [file, setFile] = useState<File | null>(null);
   const [editedSubmissions, setEditedSubmissions] = useState<Record<string, { marks: string; feedback: string }>>({});
+  const [courseFilter, setCourseFilter] = useState('all');
 
   useEffect(() => {
     if (!user) return;
