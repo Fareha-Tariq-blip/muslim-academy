@@ -155,8 +155,9 @@ const TeacherAnnouncements = () => {
               </CardContent>
             </Card>
           ))}
-        </div>
-      )}
+          </div>
+        );
+      })()}
     </div>
   );
 };
