@@ -289,15 +289,25 @@ const QuizCreator = () => {
         </Dialog>
       </div>
 
+      {courses.length > 0 && (
+        <Select value={courseFilter} onValueChange={setCourseFilter}>
+          <SelectTrigger className="w-64"><Filter className="mr-2 h-4 w-4" /><SelectValue placeholder="Filter by subject" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Subjects</SelectItem>
+            {courses.map(c => <SelectItem key={c.id} value={c.id}>{c.name} (Class {c.class}-{c.section})</SelectItem>)}
+          </SelectContent>
+        </Select>
+      )}
+
       <Card>
         <CardContent className="p-0">
           {loading ? (
             <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-          ) : quizzes.length === 0 ? (
+          ) : (courseFilter === 'all' ? quizzes : quizzes.filter(q => q.course_id === courseFilter)).length === 0 ? (
             <div className="text-center text-muted-foreground py-8">No quizzes</div>
           ) : (
             <div className="divide-y">
-              {quizzes.map(q => (
+              {(courseFilter === 'all' ? quizzes : quizzes.filter(q => q.course_id === courseFilter)).map(q => (
                 <div key={q.id}>
                   <button
                     className="flex w-full items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors text-left"
