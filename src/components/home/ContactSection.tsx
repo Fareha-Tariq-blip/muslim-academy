@@ -29,7 +29,7 @@ const ContactSection = () => {
   };
 
   return (
-    <section className="py-20 section-gradient-3" id="contact">
+    <section className="py-20 unified-section" id="contact">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Get in Touch</span>
