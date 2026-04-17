@@ -76,7 +76,7 @@ const Gallery = () => {
               {filtered.map((img, i) => (
                 <div
                   key={img.id}
-                  className={`group relative overflow-hidden rounded-xl cursor-pointer break-inside-avoid ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
+                  className={`group relative overflow-hidden rounded-xl cursor-pointer break-inside-avoid mb-4 ${getItemClass(i, 'fade')}`}
                   style={getItemDelay(i)}
                   onClick={() => setSelected(img)}
                 >

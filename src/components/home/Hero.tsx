@@ -9,7 +9,8 @@ const Hero = () => {
     <section className="relative min-h-screen flex items-center overflow-hidden">
       <div className="absolute inset-0">
         <img src={academyImg} alt="Muslim Academy Building" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--navy))]/88 via-[hsl(var(--navy-light))]/72 to-[hsl(var(--teal-dark))]/40" />
+        {/* Blue translucent + subtle blur overlay (do not remove) */}
+        <div className="absolute inset-0 backdrop-blur-[2px] bg-gradient-to-br from-[hsl(var(--navy))]/90 via-[hsl(var(--navy-light))]/78 to-[hsl(var(--teal-dark))]/55" />
       </div>
 
       <div className="absolute top-20 left-10 animate-float opacity-20">

@@ -8,6 +8,7 @@ import CourseMaterialsManager from '@/components/teacher/CourseMaterialsManager'
 import StudentPerformance from '@/components/teacher/StudentPerformance';
 import GradeManager from '@/components/teacher/GradeManager';
 import TeacherAnnouncements from '@/components/teacher/TeacherAnnouncements';
+import CommunityPosts from '@/components/community/CommunityPosts';
 import UserProfile from '@/components/dashboard/UserProfile';
 
 const TeacherDashboard = () => (
@@ -22,6 +23,7 @@ const TeacherDashboard = () => (
       <Route path="performance" element={<StudentPerformance />} />
       <Route path="grades" element={<GradeManager />} />
       <Route path="announcements" element={<TeacherAnnouncements />} />
+      <Route path="community" element={<CommunityPosts />} />
     </Routes>
   </DashboardLayout>
 );

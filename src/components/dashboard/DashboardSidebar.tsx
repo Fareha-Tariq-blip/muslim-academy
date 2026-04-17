@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Users, GraduationCap, BookOpen, Bell,
   ClipboardList, FileText, Calendar, BarChart3, MessageSquare,
-  Upload, BookMarked, Image as ImageIcon, Mail, CalendarCheck, UserCircle
+  Upload, BookMarked, Image as ImageIcon, Mail, CalendarCheck, UserCircle, Users2
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,6 +23,7 @@ const adminItems = [
   { title: 'Gallery', url: '/dashboard/admin/gallery', icon: ImageIcon },
   { title: 'Messages', url: '/dashboard/admin/messages', icon: Mail },
   { title: 'Reviews', url: '/dashboard/admin/reviews', icon: MessageSquare },
+  { title: 'Community', url: '/dashboard/admin/community', icon: Users2 },
 ];
 
 const teacherItems = [
@@ -35,6 +36,7 @@ const teacherItems = [
   { title: 'Materials', url: '/dashboard/teacher/materials', icon: Upload },
   { title: 'Performance', url: '/dashboard/teacher/performance', icon: BarChart3 },
   { title: 'Announcements', url: '/dashboard/teacher/announcements', icon: Bell },
+  { title: 'Community', url: '/dashboard/teacher/community', icon: Users2 },
 ];
 
 const studentItems = [
@@ -47,6 +49,7 @@ const studentItems = [
   { title: 'Grades', url: '/dashboard/student/grades', icon: BarChart3 },
   { title: 'Announcements', url: '/dashboard/student/announcements', icon: Bell },
   { title: 'Remarks', url: '/dashboard/student/remarks', icon: MessageSquare },
+  { title: 'Community', url: '/dashboard/student/community', icon: Users2 },
 ];
 
 const DashboardSidebar = () => {
