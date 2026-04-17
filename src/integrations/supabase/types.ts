@@ -618,6 +618,7 @@ export type Database = {
           course_id: string
           created_at: string
           created_by: string | null
+          due_date: string | null
           id: string
           title: string
           total_marks: number
@@ -627,6 +628,7 @@ export type Database = {
           course_id: string
           created_at?: string
           created_by?: string | null
+          due_date?: string | null
           id?: string
           title: string
           total_marks?: number
@@ -636,6 +638,7 @@ export type Database = {
           course_id?: string
           created_at?: string
           created_by?: string | null
+          due_date?: string | null
           id?: string
           title?: string
           total_marks?: number

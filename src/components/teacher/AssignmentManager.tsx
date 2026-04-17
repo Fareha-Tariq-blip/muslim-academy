@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Loader2, Upload, FileText, Save } from 'lucide-react';
+import { Plus, Loader2, Upload, FileText, Save, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AssignmentManager = () => {
@@ -27,6 +27,7 @@ const AssignmentManager = () => {
   const [form, setForm] = useState({ title: '', description: '', course_id: '', due_date: '' });
   const [file, setFile] = useState<File | null>(null);
   const [editedSubmissions, setEditedSubmissions] = useState<Record<string, { marks: string; feedback: string }>>({});
+  const [courseFilter, setCourseFilter] = useState('all');
 
   useEffect(() => {
     if (!user) return;
@@ -161,6 +162,16 @@ const AssignmentManager = () => {
         </Dialog>
       </div>
 
+      {courses.length > 0 && (
+        <Select value={courseFilter} onValueChange={setCourseFilter}>
+          <SelectTrigger className="w-64"><Filter className="mr-2 h-4 w-4" /><SelectValue placeholder="Filter by subject" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Subjects</SelectItem>
+            {courses.map(c => <SelectItem key={c.id} value={c.id}>{c.name} (Class {c.class}-{c.section})</SelectItem>)}
+          </SelectContent>
+        </Select>
+      )}
+
       <Card>
         <CardContent className="p-0">
           {loading ? (
@@ -176,10 +187,10 @@ const AssignmentManager = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {assignments.length === 0 ? (
+                {(courseFilter === 'all' ? assignments : assignments.filter(a => a.course_id === courseFilter)).length === 0 ? (
                   <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No assignments</TableCell></TableRow>
                 ) : (
-                  assignments.map(a => (
+                  (courseFilter === 'all' ? assignments : assignments.filter(a => a.course_id === courseFilter)).map(a => (
                     <TableRow key={a.id}>
                       <TableCell className="font-medium">{a.title}</TableCell>
                       <TableCell>{a.due_date ? new Date(a.due_date).toLocaleDateString() : 'No deadline'}</TableCell>

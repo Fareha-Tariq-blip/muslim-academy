@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Loader2, Sparkles, Trash2, FileText, ChevronDown, ChevronUp, Users, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Loader2, Sparkles, Trash2, FileText, ChevronDown, ChevronUp, Users, CheckCircle, XCircle, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +20,8 @@ const QuizCreator = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ title: '', course_id: '', total_marks: '10' });
+  const [form, setForm] = useState({ title: '', course_id: '', total_marks: '10', due_date: '' });
+  const [courseFilter, setCourseFilter] = useState('all');
   const [questions, setQuestions] = useState<{ question: string; options: string[]; correct_answer: string; marks: number }[]>([]);
   const [aiTopic, setAiTopic] = useState('');
   const [aiQuestionCount, setAiQuestionCount] = useState('5');
@@ -150,7 +151,8 @@ const QuizCreator = () => {
       course_id: form.course_id,
       total_marks: totalMarks,
       created_by: user?.id,
-    }).select().single();
+      due_date: form.due_date || null,
+    } as any).select().single();
 
     if (error || !quiz) { toast.error(error?.message || 'Failed'); setSaving(false); return; }
 
@@ -166,7 +168,7 @@ const QuizCreator = () => {
     toast.success('Quiz created!');
     setDialogOpen(false);
     setQuestions([]);
-    setForm({ title: '', course_id: '', total_marks: '10' });
+    setForm({ title: '', course_id: '', total_marks: '10', due_date: '' });
     setAiMaterialFile(null);
     setAiQuestionCount('5');
     setAiTopic('');
@@ -205,6 +207,10 @@ const QuizCreator = () => {
                     <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                     <SelectContent>{courses.map(c => <SelectItem key={c.id} value={c.id}>{c.name} (Class {c.class} - {c.section})</SelectItem>)}</SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label>Due Date (optional — students can't submit after this)</Label>
+                  <Input type="datetime-local" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} />
                 </div>
               </div>
 
@@ -283,15 +289,25 @@ const QuizCreator = () => {
         </Dialog>
       </div>
 
+      {courses.length > 0 && (
+        <Select value={courseFilter} onValueChange={setCourseFilter}>
+          <SelectTrigger className="w-64"><Filter className="mr-2 h-4 w-4" /><SelectValue placeholder="Filter by subject" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Subjects</SelectItem>
+            {courses.map(c => <SelectItem key={c.id} value={c.id}>{c.name} (Class {c.class}-{c.section})</SelectItem>)}
+          </SelectContent>
+        </Select>
+      )}
+
       <Card>
         <CardContent className="p-0">
           {loading ? (
             <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-          ) : quizzes.length === 0 ? (
+          ) : (courseFilter === 'all' ? quizzes : quizzes.filter(q => q.course_id === courseFilter)).length === 0 ? (
             <div className="text-center text-muted-foreground py-8">No quizzes</div>
           ) : (
             <div className="divide-y">
-              {quizzes.map(q => (
+              {(courseFilter === 'all' ? quizzes : quizzes.filter(q => q.course_id === courseFilter)).map(q => (
                 <div key={q.id}>
                   <button
                     className="flex w-full items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors text-left"

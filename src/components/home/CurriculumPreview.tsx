@@ -28,7 +28,7 @@ const CurriculumPreview = () => {
   const { ref: gridRef, isVisible: gridVisible, getItemClass, getItemDelay } = useStaggerAnimation();
 
   return (
-    <section className="py-20 bg-gradient-to-b from-accent/15 via-secondary/10 to-primary/15" id="curriculum">
+    <section className="py-20 unified-section" id="curriculum">
       <div className="container mx-auto px-4">
         <div ref={headerRef} className={`text-center mb-12 transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Our Subjects</span>

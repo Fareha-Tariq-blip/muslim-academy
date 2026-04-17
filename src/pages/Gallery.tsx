@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Camera } from 'lucide-react';
-import { useStaggerAnimation } from '@/hooks/useScrollAnimation';
 
 interface GalleryItem {
   id: string;
@@ -20,7 +19,6 @@ const Gallery = () => {
   const [images, setImages] = useState<GalleryItem[]>([]);
   const [selected, setSelected] = useState<GalleryItem | null>(null);
   const [filter, setFilter] = useState('all');
-  const { ref, isVisible, getItemClass, getItemDelay } = useStaggerAnimation();
 
   useEffect(() => {
     const fetch = async () => {
@@ -72,12 +70,11 @@ const Gallery = () => {
               <p className="text-muted-foreground">No gallery images yet. Check back soon!</p>
             </div>
           ) : (
-            <div ref={ref} className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-              {filtered.map((img, i) => (
+            <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
+              {filtered.map((img) => (
                 <div
                   key={img.id}
-                  className={`group relative overflow-hidden rounded-xl cursor-pointer break-inside-avoid mb-4 ${getItemClass(i, 'fade')}`}
-                  style={getItemDelay(i)}
+                  className="group relative overflow-hidden rounded-xl cursor-pointer break-inside-avoid mb-4 animate-in fade-in duration-500"
                   onClick={() => setSelected(img)}
                 >
                   <img

@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Loader2, FileText } from 'lucide-react';
+import { Plus, Loader2, FileText, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 
 const CourseMaterialsManager = () => {
@@ -19,6 +19,7 @@ const CourseMaterialsManager = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ title: '', course_id: '', file: null as File | null });
+  const [courseFilter, setCourseFilter] = useState('all');
 
   useEffect(() => {
     if (!user) return;
@@ -105,6 +106,16 @@ const CourseMaterialsManager = () => {
         </Dialog>
       </div>
 
+      {courses.length > 0 && (
+        <Select value={courseFilter} onValueChange={setCourseFilter}>
+          <SelectTrigger className="w-64"><Filter className="mr-2 h-4 w-4" /><SelectValue placeholder="Filter by subject" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Subjects</SelectItem>
+            {courses.map(c => <SelectItem key={c.id} value={c.id}>{c.name} (Class {c.class}-{c.section})</SelectItem>)}
+          </SelectContent>
+        </Select>
+      )}
+
       <Card>
         <CardContent className="p-0">
           {loading ? (
@@ -119,10 +130,10 @@ const CourseMaterialsManager = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {materials.length === 0 ? (
+                {(courseFilter === 'all' ? materials : materials.filter(m => m.course_id === courseFilter)).length === 0 ? (
                   <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-8">No materials</TableCell></TableRow>
                 ) : (
-                  materials.map(m => (
+                  (courseFilter === 'all' ? materials : materials.filter(m => m.course_id === courseFilter)).map(m => (
                     <TableRow key={m.id}>
                       <TableCell className="font-medium flex items-center gap-2"><FileText className="h-4 w-4 text-primary" />{m.title}</TableCell>
                       <TableCell>{new Date(m.created_at).toLocaleDateString()}</TableCell>

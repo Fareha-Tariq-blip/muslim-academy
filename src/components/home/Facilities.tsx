@@ -13,7 +13,7 @@ const Facilities = () => {
   const { ref: cardsRef, isVisible: cardsVisible, getItemClass, getItemDelay } = useStaggerAnimation();
 
   return (
-    <section className="py-20 section-gradient-1">
+    <section className="py-20 unified-section">
       <div className="container mx-auto px-4">
         <div ref={headerRef} className={`text-center mb-12 transition-all duration-700 ${headerVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Campus</span>
