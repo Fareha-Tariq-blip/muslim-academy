@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Loader2, Sparkles, Trash2, FileText, ChevronDown, ChevronUp, Users, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Loader2, Sparkles, Trash2, FileText, ChevronDown, ChevronUp, Users, CheckCircle, XCircle, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +20,8 @@ const QuizCreator = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ title: '', course_id: '', total_marks: '10' });
+  const [form, setForm] = useState({ title: '', course_id: '', total_marks: '10', due_date: '' });
+  const [courseFilter, setCourseFilter] = useState('all');
   const [questions, setQuestions] = useState<{ question: string; options: string[]; correct_answer: string; marks: number }[]>([]);
   const [aiTopic, setAiTopic] = useState('');
   const [aiQuestionCount, setAiQuestionCount] = useState('5');
