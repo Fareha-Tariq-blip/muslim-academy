@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bell, Loader2, Plus, Trash2 } from 'lucide-react';
+import { Bell, Loader2, Plus, Trash2, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -19,6 +19,7 @@ const TeacherAnnouncements = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ title: '', content: '', course_id: '', target_role: 'student' as string });
+  const [courseFilter, setCourseFilter] = useState('all');
 
   useEffect(() => {
     if (!user) return;
@@ -113,11 +114,23 @@ const TeacherAnnouncements = () => {
         </Dialog>
       </div>
 
-      {announcements.length === 0 ? (
-        <Card><CardContent className="p-8 text-center text-muted-foreground">No announcements posted yet</CardContent></Card>
-      ) : (
-        <div className="space-y-4">
-          {announcements.map(a => (
+      {courses.length > 0 && (
+        <Select value={courseFilter} onValueChange={setCourseFilter}>
+          <SelectTrigger className="w-64"><Filter className="mr-2 h-4 w-4" /><SelectValue placeholder="Filter by subject" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Subjects</SelectItem>
+            {courses.map(c => <SelectItem key={c.id} value={c.id}>{c.name} (Class {c.class}-{c.section})</SelectItem>)}
+          </SelectContent>
+        </Select>
+      )}
+
+      {(() => {
+        const visible = courseFilter === 'all' ? announcements : announcements.filter(a => a.course_id === courseFilter);
+        return visible.length === 0 ? (
+          <Card><CardContent className="p-8 text-center text-muted-foreground">No announcements posted yet</CardContent></Card>
+        ) : (
+          <div className="space-y-4">
+            {visible.map(a => (
             <Card key={a.id}>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
