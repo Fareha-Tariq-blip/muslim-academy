@@ -16,7 +16,7 @@ const About = () => {
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-br from-secondary/15 via-accent/10 to-primary/15" id="about">
+    <section className="py-20 unified-section" id="about">
       <div className="container mx-auto px-4">
         <div ref={headerRef} className={`text-center mb-12 transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">About Us</span>
