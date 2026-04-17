@@ -45,6 +45,10 @@ const QuizAttempt = () => {
 
   const startQuiz = async (quiz: any) => {
     if (quiz.attempt) { toast.error('You can only take each quiz once.'); return; }
+    if (quiz.due_date && new Date(quiz.due_date) < new Date()) {
+      toast.error('This quiz is closed — due date has passed.');
+      return;
+    }
     const { data } = await supabase.from('quiz_questions').select('*').eq('quiz_id', quiz.id);
     setQuestions(data || []);
     setActiveQuiz(quiz);
@@ -206,22 +210,29 @@ const QuizAttempt = () => {
         <Card><CardContent className="p-8 text-center text-muted-foreground">No quizzes available</CardContent></Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredQuizzes.map(q => (
+          {filteredQuizzes.map(q => {
+            const overdue = q.due_date && new Date(q.due_date) < new Date();
+            return (
             <Card key={q.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <h3 className="font-semibold text-foreground">{q.title}</h3>
                 <p className="text-sm text-muted-foreground">Total: {q.total_marks} marks</p>
+                {q.due_date && (
+                  <p className="text-xs text-muted-foreground mt-1">Due: {new Date(q.due_date).toLocaleString()}</p>
+                )}
                 {q.attempt ? (
                   <div className="mt-3">
                     <p className="text-sm font-medium text-secondary">{q.total_marks > 0 ? `Score: ${q.attempt.score}/${q.total_marks}` : 'Submitted once'}</p>
                     <Button className="mt-2" size="sm" variant="outline" onClick={() => viewResults(q)}>View Answers</Button>
                   </div>
+                ) : overdue ? (
+                  <p className="mt-3 text-sm font-medium text-destructive">⛔ Closed — past due date</p>
                 ) : (
                   <Button className="mt-3" size="sm" onClick={() => startQuiz(q)}>Start Quiz</Button>
                 )}
               </CardContent>
             </Card>
-          ))}
+          );})}
         </div>
       )}
     </div>

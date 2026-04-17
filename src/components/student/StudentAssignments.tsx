@@ -40,6 +40,11 @@ const StudentAssignments = () => {
   }, [user]);
 
   const submitAssignment = async (assignmentId: string, file: File) => {
+    const a = assignments.find(x => x.id === assignmentId);
+    if (a?.due_date && new Date(a.due_date) < new Date()) {
+      toast.error('Submission closed — due date has passed.');
+      return;
+    }
     const filePath = `${user!.id}/${Date.now()}-${file.name}`;
     const { error: uploadError } = await supabase.storage.from('submissions').upload(filePath, file);
     if (uploadError) { toast.error('Upload failed'); return; }
@@ -99,23 +104,28 @@ const StudentAssignments = () => {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No assignments</TableCell></TableRow>
-              ) : filtered.map(a => (
+              ) : filtered.map(a => {
+                const overdue = a.due_date && new Date(a.due_date) < new Date();
+                return (
                 <TableRow key={a.id}>
                   <TableCell className="font-medium">{a.title}</TableCell>
                   <TableCell className="text-sm">{getCourseName(a.course_id)}</TableCell>
                   <TableCell>{a.due_date ? new Date(a.due_date).toLocaleDateString() : '-'}</TableCell>
-                  <TableCell>{a.submission ? (a.submission.graded ? '✅ Graded' : '📤 Submitted') : '⏳ Pending'}</TableCell>
+                  <TableCell>{a.submission ? (a.submission.graded ? '✅ Graded' : '📤 Submitted') : (overdue ? '⛔ Closed' : '⏳ Pending')}</TableCell>
                   <TableCell>{a.submission?.marks ?? '-'}</TableCell>
                   <TableCell className="text-right">
-                    {!a.submission && (
+                    {!a.submission && !overdue && (
                       <label className="cursor-pointer">
                         <Input type="file" className="hidden" onChange={e => { if (e.target.files?.[0]) submitAssignment(a.id, e.target.files[0]); }} />
                         <Button variant="outline" size="sm" asChild><span><Upload className="mr-1 h-3 w-3" /> Submit</span></Button>
                       </label>
                     )}
+                    {!a.submission && overdue && (
+                      <span className="text-xs text-destructive font-medium">Past due</span>
+                    )}
                   </TableCell>
                 </TableRow>
-              ))}
+              );})}
             </TableBody>
           </Table>
         </CardContent>
