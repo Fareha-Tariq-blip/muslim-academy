@@ -131,9 +131,14 @@ const Gallery = () => {
           {selected && (
             <div>
               <img src={selected.image_url} alt={selected.title} className="w-full rounded-lg" />
-              <div className="p-4">
-                <h3 className="font-display text-lg font-bold">{selected.title}</h3>
-                {selected.description && <p className="text-sm text-muted-foreground mt-1">{selected.description}</p>}
+              <div className="p-4 flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="font-display text-lg font-bold">{selected.title}</h3>
+                  {selected.description && <p className="text-sm text-muted-foreground mt-1">{selected.description}</p>}
+                </div>
+                <Button onClick={(e) => downloadImage(e, selected)} className="gap-2 shrink-0">
+                  <Download className="h-4 w-4" /> Download
+                </Button>
               </div>
             </div>
           )}
