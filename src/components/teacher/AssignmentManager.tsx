@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Loader2, Upload, FileText, Save, Filter } from 'lucide-react';
+import { Plus, Loader2, Upload, FileText, Save, Filter, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AssignmentManager = () => {
@@ -211,18 +211,20 @@ const AssignmentManager = () => {
                 <TableRow>
                   <TableHead>Title</TableHead>
                   <TableHead>Due Date</TableHead>
+                  <TableHead>Total Marks</TableHead>
                   <TableHead>File</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {(courseFilter === 'all' ? assignments : assignments.filter(a => a.course_id === courseFilter)).length === 0 ? (
-                  <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No assignments</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No assignments</TableCell></TableRow>
                 ) : (
                   (courseFilter === 'all' ? assignments : assignments.filter(a => a.course_id === courseFilter)).map(a => (
                     <TableRow key={a.id}>
                       <TableCell className="font-medium">{a.title}</TableCell>
                       <TableCell>{a.due_date ? new Date(a.due_date).toLocaleDateString() : 'No deadline'}</TableCell>
+                      <TableCell>{a.total_marks ?? 100}</TableCell>
                       <TableCell>
                         {a.file_url ? (
                           <a href={a.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
@@ -244,14 +246,14 @@ const AssignmentManager = () => {
 
       <Dialog open={subDialogOpen} onOpenChange={(open) => { setSubDialogOpen(open); if (!open) { setSubmissions([]); setEditedSubmissions({}); } }}>
         <DialogContent className="max-w-3xl">
-          <DialogHeader><DialogTitle>Submissions</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Submissions (out of {currentTotalMarks})</DialogTitle></DialogHeader>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Student</TableHead>
                 <TableHead>Roll No.</TableHead>
                 <TableHead>File</TableHead>
-                <TableHead>Marks</TableHead>
+                <TableHead>Marks / {currentTotalMarks}</TableHead>
                 <TableHead>Remarks</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
@@ -263,12 +265,16 @@ const AssignmentManager = () => {
                   <TableCell>{s.roll_number}</TableCell>
                   <TableCell>
                     {s.file_url ? (
-                      <a href={s.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View</a>
+                      <Button variant="outline" size="sm" onClick={() => downloadSubmission(s.file_url, s.student_name)}>
+                        <Download className="mr-1 h-3 w-3" /> Download
+                      </Button>
                     ) : '—'}
                   </TableCell>
                   <TableCell>
                     <Input
                       type="number"
+                      min={0}
+                      max={currentTotalMarks}
                       className="w-20"
                       value={editedSubmissions[s.id]?.marks || ''}
                       onChange={(e) => setEditedSubmissions(prev => ({
