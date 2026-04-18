@@ -6,9 +6,10 @@ import logo from '@/assets/muslim-academy-logo.png';
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
-      <div className="absolute inset-0">
-        <img src={academyImg} alt="Muslim Academy Building" className="h-full w-full object-cover object-center" style={{ objectPosition: 'center 30%' }} />
+    <section className="relative min-h-screen flex items-center overflow-hidden pt-[88px]">
+      {/* Image starts BELOW the fixed header so it stays fully visible */}
+      <div className="absolute inset-x-0 bottom-0 top-[88px]">
+        <img src={academyImg} alt="Muslim Academy Building" className="h-full w-full object-cover" style={{ objectPosition: 'center 35%' }} />
         {/* Blue translucent + subtle blur overlay (do not remove) */}
         <div className="absolute inset-0 backdrop-blur-[2px] bg-gradient-to-br from-[hsl(var(--navy))]/90 via-[hsl(var(--navy-light))]/78 to-[hsl(var(--teal-dark))]/55" />
       </div>
@@ -32,7 +33,7 @@ const Hero = () => {
         </svg>
       </div>
 
-      <div className="container relative z-10 mx-auto px-4 pt-32 md:pt-36">
+      <div className="container relative z-10 mx-auto px-4 py-20 md:py-24">
         <div className="grid items-center gap-12 md:grid-cols-2">
           <div className="animate-fade-in">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/20 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-accent mb-6 border border-accent/30">

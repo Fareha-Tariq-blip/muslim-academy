@@ -112,7 +112,7 @@ const StudentAssignments = () => {
                   <TableCell className="text-sm">{getCourseName(a.course_id)}</TableCell>
                   <TableCell>{a.due_date ? new Date(a.due_date).toLocaleDateString() : '-'}</TableCell>
                   <TableCell>{a.submission ? (a.submission.graded ? '✅ Graded' : '📤 Submitted') : (overdue ? '⛔ Closed' : '⏳ Pending')}</TableCell>
-                  <TableCell>{a.submission?.marks ?? '-'}</TableCell>
+                  <TableCell>{a.submission?.marks != null ? `${a.submission.marks} / ${a.total_marks ?? 100}` : `— / ${a.total_marks ?? 100}`}</TableCell>
                   <TableCell className="text-right">
                     {!a.submission && !overdue && (
                       <label className="cursor-pointer">

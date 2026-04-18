@@ -58,7 +58,7 @@ export const useStaggerAnimation = (threshold = 0.1) => {
     return `${base} opacity-100 translate-x-0 translate-y-0 scale-100`;
   };
 
-  const getItemDelay = (index: number) => ({ transitionDelay: `${index * 80 + 100}ms` });
+  const getItemDelay = (index: number) => ({ transitionDelay: `${Math.min(index * 40, 400)}ms` });
 
   return { ref, isVisible, getItemClass, getItemDelay };
 };

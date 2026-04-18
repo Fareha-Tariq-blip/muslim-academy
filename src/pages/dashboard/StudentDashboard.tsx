@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import StudentOverview from '@/components/student/StudentOverview';
 import StudentCourses from '@/components/student/StudentCourses';
 import StudentAssignments from '@/components/student/StudentAssignments';
+import StudentMaterials from '@/components/student/StudentMaterials';
 import QuizAttempt from '@/components/student/QuizAttempt';
 import StudentAttendance from '@/components/student/StudentAttendance';
 import StudentGrades from '@/components/student/StudentGrades';
@@ -18,6 +19,7 @@ const StudentDashboard = () => (
       <Route path="profile" element={<UserProfile />} />
       <Route path="courses" element={<StudentCourses />} />
       <Route path="assignments" element={<StudentAssignments />} />
+      <Route path="materials" element={<StudentMaterials />} />
       <Route path="quizzes" element={<QuizAttempt />} />
       <Route path="attendance" element={<StudentAttendance />} />
       <Route path="grades" element={<StudentGrades />} />

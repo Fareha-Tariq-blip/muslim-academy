@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Loader2, Upload, FileText, Save, Filter } from 'lucide-react';
+import { Plus, Loader2, Upload, FileText, Save, Filter, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AssignmentManager = () => {
@@ -24,10 +24,11 @@ const AssignmentManager = () => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [savingGrades, setSavingGrades] = useState(false);
-  const [form, setForm] = useState({ title: '', description: '', course_id: '', due_date: '' });
+  const [form, setForm] = useState({ title: '', description: '', course_id: '', due_date: '', total_marks: '100' });
   const [file, setFile] = useState<File | null>(null);
   const [editedSubmissions, setEditedSubmissions] = useState<Record<string, { marks: string; feedback: string }>>({});
   const [courseFilter, setCourseFilter] = useState('all');
+  const [currentTotalMarks, setCurrentTotalMarks] = useState<number>(100);
 
   useEffect(() => {
     if (!user) return;
@@ -72,12 +73,13 @@ const AssignmentManager = () => {
     const { error } = await supabase.from('assignments').insert({
       title: form.title, description: form.description, course_id: form.course_id,
       due_date: form.due_date || null, file_url: fileUrl, created_by: user?.id,
+      total_marks: parseInt(form.total_marks) || 100,
     });
     if (error) toast.error(error.message);
     else {
       toast.success('Assignment created');
       setDialogOpen(false);
-      setForm({ title: '', description: '', course_id: '', due_date: '' });
+      setForm({ title: '', description: '', course_id: '', due_date: '', total_marks: '100' });
       setFile(null);
       const { data: t } = await supabase.from('teachers').select('id').eq('user_id', user!.id).single();
       if (t) {
@@ -94,6 +96,8 @@ const AssignmentManager = () => {
 
   const viewSubmissions = async (assignmentId: string) => {
     setSelectedAssignment(assignmentId);
+    const a = assignments.find(x => x.id === assignmentId);
+    setCurrentTotalMarks(a?.total_marks ?? 100);
     const { data } = await supabase.from('assignment_submissions').select('*').eq('assignment_id', assignmentId);
     if (data) {
       const enriched = await Promise.all(data.map(async (s) => {
@@ -102,7 +106,6 @@ const AssignmentManager = () => {
         return { ...s, student_name: profile?.full_name || 'Unknown', roll_number: student?.roll_number || '' };
       }));
       setSubmissions(enriched);
-      // Initialize editable state
       const edits: Record<string, { marks: string; feedback: string }> = {};
       enriched.forEach(s => {
         edits[s.id] = { marks: s.marks?.toString() || '', feedback: s.feedback || '' };
@@ -110,6 +113,29 @@ const AssignmentManager = () => {
       setEditedSubmissions(edits);
     }
     setSubDialogOpen(true);
+  };
+
+  const downloadSubmission = async (fileUrl: string, studentName: string) => {
+    try {
+      // Submissions bucket is private — extract path and create a signed URL
+      const marker = '/submissions/';
+      const idx = fileUrl.indexOf(marker);
+      const path = idx >= 0 ? fileUrl.substring(idx + marker.length) : fileUrl;
+      const { data, error } = await supabase.storage.from('submissions').createSignedUrl(path, 60);
+      if (error || !data?.signedUrl) { toast.error('Could not access file'); return; }
+      const res = await fetch(data.signedUrl);
+      const blob = await res.blob();
+      const ext = path.split('.').pop() || 'file';
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${studentName.replace(/\s+/g, '_')}_submission.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+    } catch {
+      toast.error('Download failed');
+    }
   };
 
   const handleSaveAllGrades = async () => {
@@ -145,7 +171,10 @@ const AssignmentManager = () => {
                   <SelectContent>{courses.map(c => <SelectItem key={c.id} value={c.id}>{c.name} (Class {c.class} - {c.section})</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2"><Label>Due Date</Label><Input type="datetime-local" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2"><Label>Due Date</Label><Input type="datetime-local" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} /></div>
+                <div className="space-y-2"><Label>Total Marks</Label><Input type="number" min={1} value={form.total_marks} onChange={e => setForm(f => ({ ...f, total_marks: e.target.value }))} required /></div>
+              </div>
               <div className="space-y-2">
                 <Label>Attachment (optional)</Label>
                 <div className="flex items-center gap-2">
@@ -182,18 +211,20 @@ const AssignmentManager = () => {
                 <TableRow>
                   <TableHead>Title</TableHead>
                   <TableHead>Due Date</TableHead>
+                  <TableHead>Total Marks</TableHead>
                   <TableHead>File</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {(courseFilter === 'all' ? assignments : assignments.filter(a => a.course_id === courseFilter)).length === 0 ? (
-                  <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No assignments</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No assignments</TableCell></TableRow>
                 ) : (
                   (courseFilter === 'all' ? assignments : assignments.filter(a => a.course_id === courseFilter)).map(a => (
                     <TableRow key={a.id}>
                       <TableCell className="font-medium">{a.title}</TableCell>
                       <TableCell>{a.due_date ? new Date(a.due_date).toLocaleDateString() : 'No deadline'}</TableCell>
+                      <TableCell>{a.total_marks ?? 100}</TableCell>
                       <TableCell>
                         {a.file_url ? (
                           <a href={a.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
@@ -215,14 +246,14 @@ const AssignmentManager = () => {
 
       <Dialog open={subDialogOpen} onOpenChange={(open) => { setSubDialogOpen(open); if (!open) { setSubmissions([]); setEditedSubmissions({}); } }}>
         <DialogContent className="max-w-3xl">
-          <DialogHeader><DialogTitle>Submissions</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Submissions (out of {currentTotalMarks})</DialogTitle></DialogHeader>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Student</TableHead>
                 <TableHead>Roll No.</TableHead>
                 <TableHead>File</TableHead>
-                <TableHead>Marks</TableHead>
+                <TableHead>Marks / {currentTotalMarks}</TableHead>
                 <TableHead>Remarks</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
@@ -234,12 +265,16 @@ const AssignmentManager = () => {
                   <TableCell>{s.roll_number}</TableCell>
                   <TableCell>
                     {s.file_url ? (
-                      <a href={s.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View</a>
+                      <Button variant="outline" size="sm" onClick={() => downloadSubmission(s.file_url, s.student_name)}>
+                        <Download className="mr-1 h-3 w-3" /> Download
+                      </Button>
                     ) : '—'}
                   </TableCell>
                   <TableCell>
                     <Input
                       type="number"
+                      min={0}
+                      max={currentTotalMarks}
                       className="w-20"
                       value={editedSubmissions[s.id]?.marks || ''}
                       onChange={(e) => setEditedSubmissions(prev => ({

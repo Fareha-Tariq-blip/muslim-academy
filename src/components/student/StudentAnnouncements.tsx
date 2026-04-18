@@ -32,12 +32,17 @@ const StudentAnnouncements = () => {
                   <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
                     <Bell className="h-5 w-5 text-primary" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-foreground">{a.title}</h3>
                       <span className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleDateString()}</span>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">{a.content}</p>
+                    {a.target_class && (
+                      <span className="mt-2 inline-block rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                        For: Class {a.target_class}{a.target_section ? `-${a.target_section}` : ''}
+                      </span>
+                    )}
                   </div>
                 </div>
               </CardContent>

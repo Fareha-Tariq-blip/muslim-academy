@@ -21,7 +21,9 @@ export type Database = {
           course_id: string | null
           created_at: string
           id: string
+          target_class: string | null
           target_role: Database["public"]["Enums"]["app_role"] | null
+          target_section: string | null
           title: string
           updated_at: string
         }
@@ -31,7 +33,9 @@ export type Database = {
           course_id?: string | null
           created_at?: string
           id?: string
+          target_class?: string | null
           target_role?: Database["public"]["Enums"]["app_role"] | null
+          target_section?: string | null
           title: string
           updated_at?: string
         }
@@ -41,7 +45,9 @@ export type Database = {
           course_id?: string | null
           created_at?: string
           id?: string
+          target_class?: string | null
           target_role?: Database["public"]["Enums"]["app_role"] | null
+          target_section?: string | null
           title?: string
           updated_at?: string
         }
@@ -116,6 +122,7 @@ export type Database = {
           file_url: string | null
           id: string
           title: string
+          total_marks: number
           updated_at: string
         }
         Insert: {
@@ -127,6 +134,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           title: string
+          total_marks?: number
           updated_at?: string
         }
         Update: {
@@ -138,6 +146,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           title?: string
+          total_marks?: number
           updated_at?: string
         }
         Relationships: [

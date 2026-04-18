@@ -18,8 +18,14 @@ const TeacherAnnouncements = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ title: '', content: '', course_id: '', target_role: 'student' as string });
+  const [form, setForm] = useState({ title: '', content: '', course_id: 'all', target_class: 'all', target_section: 'all' });
   const [courseFilter, setCourseFilter] = useState('all');
+
+  const fetchAnnouncements = async () => {
+    // RLS will filter to what teacher can see (their target_role='teacher' + own posts + admin announcements affecting them)
+    const { data: a } = await supabase.from('announcements').select('*, courses(name, class, section)').order('created_at', { ascending: false });
+    setAnnouncements(a || []);
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -29,12 +35,15 @@ const TeacherAnnouncements = () => {
         const { data: c } = await supabase.from('courses').select('*').eq('teacher_id', t.id);
         setCourses(c || []);
       }
-      const { data: a } = await supabase.from('announcements').select('*, courses(name)').eq('author_id', user.id).order('created_at', { ascending: false });
-      setAnnouncements(a || []);
+      await fetchAnnouncements();
       setLoading(false);
     };
     fetchData();
   }, [user]);
+
+  // Distinct classes the teacher actually teaches
+  const teacherClasses = Array.from(new Set(courses.map(c => c.class))).sort();
+  const teacherSections = Array.from(new Set(courses.map(c => c.section))).sort();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,17 +53,17 @@ const TeacherAnnouncements = () => {
       title: form.title,
       content: form.content,
       author_id: user!.id,
-      course_id: form.course_id || null,
-      target_role: form.target_role as any,
+      course_id: form.course_id === 'all' ? null : form.course_id,
+      target_role: 'student' as any,
+      target_class: form.target_class === 'all' ? null : form.target_class,
+      target_section: form.target_section === 'all' ? null : form.target_section,
     });
     if (error) toast.error(error.message);
     else {
       toast.success('Announcement posted!');
       setDialogOpen(false);
-      setForm({ title: '', content: '', course_id: '', target_role: 'student' });
-      // Refresh
-      const { data: a } = await supabase.from('announcements').select('*, courses(name)').eq('author_id', user!.id).order('created_at', { ascending: false });
-      setAnnouncements(a || []);
+      setForm({ title: '', content: '', course_id: 'all', target_class: 'all', target_section: 'all' });
+      await fetchAnnouncements();
     }
     setSaving(false);
   };
@@ -96,15 +105,27 @@ const TeacherAnnouncements = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Target Audience</Label>
-                <Select value={form.target_role} onValueChange={v => setForm(f => ({ ...f, target_role: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="student">Students</SelectItem>
-                    <SelectItem value="teacher">Teachers</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Target Class</Label>
+                  <Select value={form.target_class} onValueChange={v => setForm(f => ({ ...f, target_class: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All my classes</SelectItem>
+                      {teacherClasses.map(c => <SelectItem key={c} value={c}>Class {c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Target Section</Label>
+                  <Select value={form.target_section} onValueChange={v => setForm(f => ({ ...f, target_section: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All sections</SelectItem>
+                      {teacherSections.map(s => <SelectItem key={s} value={s}>Section {s}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={saving}>
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Post Announcement
@@ -127,34 +148,36 @@ const TeacherAnnouncements = () => {
       {(() => {
         const visible = courseFilter === 'all' ? announcements : announcements.filter(a => a.course_id === courseFilter);
         return visible.length === 0 ? (
-          <Card><CardContent className="p-8 text-center text-muted-foreground">No announcements posted yet</CardContent></Card>
+          <Card><CardContent className="p-8 text-center text-muted-foreground">No announcements yet</CardContent></Card>
         ) : (
           <div className="space-y-4">
             {visible.map(a => (
-            <Card key={a.id}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                      <Bell className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">{a.title}</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">{a.content}</p>
-                      <div className="mt-2 flex gap-2 text-xs text-muted-foreground">
-                        <span>{new Date(a.created_at).toLocaleDateString()}</span>
-                        {a.courses?.name && <span>• {a.courses.name}</span>}
-                        <span>• For: {a.target_role}</span>
+              <Card key={a.id}>
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                        <Bell className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">{a.title}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">{a.content}</p>
+                        <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                          <span>{new Date(a.created_at).toLocaleDateString()}</span>
+                          {a.courses?.name && <span>• {a.courses.name}</span>}
+                          <span>• For: {a.target_class ? `Class ${a.target_class}${a.target_section ? `-${a.target_section}` : ''}` : 'All Classes'}</span>
+                        </div>
                       </div>
                     </div>
+                    {a.author_id === user?.id && (
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(a.id)} className="text-destructive hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(a.id)} className="text-destructive hover:text-destructive">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
           </div>
         );
       })()}

@@ -45,6 +45,7 @@ const studentItems = [
   { title: 'My Courses', url: '/dashboard/student/courses', icon: BookOpen },
   { title: 'Assignments', url: '/dashboard/student/assignments', icon: ClipboardList },
   { title: 'Quizzes', url: '/dashboard/student/quizzes', icon: FileText },
+  { title: 'Materials', url: '/dashboard/student/materials', icon: BookMarked },
   { title: 'Attendance', url: '/dashboard/student/attendance', icon: Calendar },
   { title: 'Grades', url: '/dashboard/student/grades', icon: BarChart3 },
   { title: 'Announcements', url: '/dashboard/student/announcements', icon: Bell },

@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 const AdminReviews = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved'>('all');
 
   const fetchReviews = async () => {
     setLoading(true);
@@ -19,6 +20,8 @@ const AdminReviews = () => {
   };
 
   useEffect(() => { fetchReviews(); }, []);
+
+  const visible = statusFilter === 'all' ? reviews : statusFilter === 'approved' ? reviews.filter(r => r.approved) : reviews.filter(r => !r.approved);
 
   const approve = async (id: string) => {
     await supabase.from('reviews').update({ approved: true }).eq('id', id);
@@ -41,7 +44,14 @@ const AdminReviews = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="font-display text-2xl font-bold text-foreground">Community Reviews</h2>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h2 className="font-display text-2xl font-bold text-foreground">Community Reviews</h2>
+        <div className="flex gap-2">
+          {(['all','pending','approved'] as const).map(s => (
+            <Button key={s} variant={statusFilter === s ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter(s)} className="capitalize">{s}</Button>
+          ))}
+        </div>
+      </div>
       <Card>
         <CardContent className="p-0">
           {loading ? (
@@ -60,10 +70,10 @@ const AdminReviews = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {reviews.length === 0 ? (
+                {visible.length === 0 ? (
                   <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No reviews</TableCell></TableRow>
                 ) : (
-                  reviews.map(r => (
+                  visible.map(r => (
                     <TableRow key={r.id}>
                       <TableCell className="font-medium">{r.name}</TableCell>
                       <TableCell className="capitalize">{r.role}</TableCell>
