@@ -47,14 +47,14 @@ const About = () => {
           {features.map((f, i) => (
             <div
               key={i}
-              className={`group rounded-xl border border-accent/30 bg-accent/10 p-6 text-center transition-all hover:shadow-xl hover:-translate-y-1 hover:bg-accent/20 ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
+              className={`group rounded-xl border-2 border-secondary/40 bg-gradient-to-br from-secondary/25 via-secondary/15 to-accent/20 p-6 text-center transition-all hover:shadow-xl hover:-translate-y-1 hover:border-secondary/60 ${getItemClass(i)}`}
               style={getItemDelay(i)}
             >
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent text-accent-foreground transition-transform group-hover:scale-110 animate-pulse-glow">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-secondary text-secondary-foreground transition-transform group-hover:scale-110 shadow-lg shadow-secondary/30">
                 <f.icon className="h-7 w-7" />
               </div>
               <h3 className="font-display text-lg font-semibold text-foreground">{f.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{f.desc}</p>
+              <p className="mt-2 text-sm text-foreground/75">{f.desc}</p>
             </div>
           ))}
         </div>

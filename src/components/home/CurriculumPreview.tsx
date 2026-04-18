@@ -44,10 +44,10 @@ const CurriculumPreview = () => {
           {subjects.map((subject, i) => (
             <div
               key={i}
-              className={`group flex flex-col items-center gap-3 rounded-xl border border-accent/30 bg-accent/10 p-5 text-center transition-all hover:shadow-lg hover:-translate-y-2 hover:bg-accent/20 cursor-pointer ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
+              className={`group flex flex-col items-center gap-3 rounded-xl border-2 border-secondary/40 bg-gradient-to-br from-secondary/25 via-secondary/15 to-accent/20 p-5 text-center transition-all hover:shadow-lg hover:-translate-y-1 hover:border-secondary/60 cursor-pointer ${getItemClass(i)}`}
               style={getItemDelay(i)}
             >
-              <div className="rounded-lg p-2 bg-accent text-accent-foreground transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12">
+              <div className="rounded-lg p-2 bg-secondary text-secondary-foreground transition-transform duration-300 group-hover:scale-110 shadow-md shadow-secondary/30">
                 <subject.icon className="h-8 w-8" />
               </div>
               <span className="text-sm font-medium text-foreground">{subject.name}</span>
