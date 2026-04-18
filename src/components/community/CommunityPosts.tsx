@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +40,8 @@ interface Props {
 }
 
 const CommunityPosts = ({ basePath }: Props) => {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const isAdmin = role === 'admin';
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [content, setContent] = useState('');
@@ -223,8 +225,8 @@ const CommunityPosts = ({ basePath }: Props) => {
                     <span className="text-xs text-muted-foreground ml-auto">
                       {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                     </span>
-                    {user?.id === post.author_id && (
-                      <button onClick={() => deletePost(post.id)} className="text-muted-foreground hover:text-destructive">
+                    {(user?.id === post.author_id || isAdmin) && (
+                      <button onClick={() => deletePost(post.id)} className="text-muted-foreground hover:text-destructive" title={isAdmin && user?.id !== post.author_id ? 'Delete (admin)' : 'Delete'}>
                         <Trash2 className="h-4 w-4" />
                       </button>
                     )}
@@ -266,8 +268,8 @@ const CommunityPosts = ({ basePath }: Props) => {
                               <span className="text-[10px] text-muted-foreground">
                                 {formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}
                               </span>
-                              {user?.id === r.author_id && (
-                                <button onClick={() => deleteReply(r.id)} className="ml-auto text-muted-foreground hover:text-destructive">
+                              {(user?.id === r.author_id || isAdmin) && (
+                                <button onClick={() => deleteReply(r.id)} className="ml-auto text-muted-foreground hover:text-destructive" title={isAdmin && user?.id !== r.author_id ? 'Delete (admin)' : 'Delete'}>
                                   <Trash2 className="h-3 w-3" />
                                 </button>
                               )}
