@@ -4,7 +4,9 @@ import Footer from '@/components/layout/Footer';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Camera } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Camera, Download } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface GalleryItem {
   id: string;
@@ -30,6 +32,25 @@ const Gallery = () => {
 
   const categories = ['all', ...new Set(images.map(i => i.category))];
   const filtered = filter === 'all' ? images : images.filter(i => i.category === filter);
+
+  const downloadImage = async (e: React.MouseEvent, img: GalleryItem) => {
+    e.stopPropagation();
+    try {
+      const res = await fetch(img.image_url);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const ext = img.image_url.split('.').pop()?.split('?')[0] || 'jpg';
+      a.download = `${img.title.replace(/[^a-z0-9]/gi, '_')}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error('Failed to download image');
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -84,10 +105,19 @@ const Gallery = () => {
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl flex items-end p-4">
-                    <div>
+                    <div className="flex-1">
                       <p className="text-[hsl(40,30%,96%)] font-semibold text-sm">{img.title}</p>
                       <Badge variant="secondary" className="mt-1 text-[10px] capitalize">{img.category}</Badge>
                     </div>
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      onClick={(e) => downloadImage(e, img)}
+                      className="h-8 w-8 shrink-0"
+                      title="Download image"
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -101,9 +131,14 @@ const Gallery = () => {
           {selected && (
             <div>
               <img src={selected.image_url} alt={selected.title} className="w-full rounded-lg" />
-              <div className="p-4">
-                <h3 className="font-display text-lg font-bold">{selected.title}</h3>
-                {selected.description && <p className="text-sm text-muted-foreground mt-1">{selected.description}</p>}
+              <div className="p-4 flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="font-display text-lg font-bold">{selected.title}</h3>
+                  {selected.description && <p className="text-sm text-muted-foreground mt-1">{selected.description}</p>}
+                </div>
+                <Button onClick={(e) => downloadImage(e, selected)} className="gap-2 shrink-0">
+                  <Download className="h-4 w-4" /> Download
+                </Button>
               </div>
             </div>
           )}

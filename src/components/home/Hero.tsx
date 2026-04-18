@@ -8,31 +8,31 @@ const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       <div className="absolute inset-0">
-        <img src={academyImg} alt="Muslim Academy Building" className="h-full w-full object-cover" />
+        <img src={academyImg} alt="Muslim Academy Building" className="h-full w-full object-cover object-center" style={{ objectPosition: 'center 30%' }} />
         {/* Blue translucent + subtle blur overlay (do not remove) */}
         <div className="absolute inset-0 backdrop-blur-[2px] bg-gradient-to-br from-[hsl(var(--navy))]/90 via-[hsl(var(--navy-light))]/78 to-[hsl(var(--teal-dark))]/55" />
       </div>
 
-      <div className="absolute top-20 left-10 animate-float opacity-20">
-        <GraduationCap className="h-16 w-16 text-accent" />
+      <div className="absolute top-28 left-10 animate-float opacity-80 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+        <GraduationCap className="h-16 w-16 text-[hsl(174,70%,65%)]" />
       </div>
-      <div className="absolute top-40 right-20 animate-float opacity-15" style={{ animationDelay: '2s' }}>
-        <BookOpen className="h-12 w-12 text-secondary" />
+      <div className="absolute top-44 right-20 animate-float opacity-75 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" style={{ animationDelay: '2s' }}>
+        <BookOpen className="h-12 w-12 text-[hsl(45,90%,70%)]" />
       </div>
-      <div className="absolute bottom-40 left-1/4 animate-float opacity-10" style={{ animationDelay: '4s' }}>
-        <Star className="h-10 w-10 text-accent" />
+      <div className="absolute bottom-40 left-1/4 animate-float opacity-70 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" style={{ animationDelay: '4s' }}>
+        <Star className="h-10 w-10 text-[hsl(45,95%,70%)]" />
       </div>
-      <div className="absolute top-32 right-1/3 animate-float opacity-10" style={{ animationDelay: '3s' }}>
-        <Sparkles className="h-8 w-8 text-secondary" />
+      <div className="absolute top-36 right-1/3 animate-float opacity-70 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" style={{ animationDelay: '3s' }}>
+        <Sparkles className="h-8 w-8 text-[hsl(174,70%,70%)]" />
       </div>
 
       <div className="absolute top-1/2 animate-fly-across pointer-events-none">
-        <svg viewBox="0 0 24 24" className="h-8 w-8 text-accent/40 fill-current" style={{ transform: 'rotate(-30deg)' }}>
+        <svg viewBox="0 0 24 24" className="h-8 w-8 text-[hsl(45,90%,70%)] opacity-80 fill-current drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]" style={{ transform: 'rotate(-30deg)' }}>
           <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
         </svg>
       </div>
 
-      <div className="container relative z-10 mx-auto px-4 pt-24">
+      <div className="container relative z-10 mx-auto px-4 pt-32 md:pt-36">
         <div className="grid items-center gap-12 md:grid-cols-2">
           <div className="animate-fade-in">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/20 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-accent mb-6 border border-accent/30">
