@@ -26,15 +26,15 @@ const Facilities = () => {
           {facilities.map((f, i) => (
             <div
               key={i}
-              className={`group overflow-hidden rounded-xl border border-primary/20 bg-card/80 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
+              className={`group overflow-hidden rounded-xl border border-secondary/40 bg-gradient-to-br from-secondary/25 via-card/90 to-secondary/15 shadow-md transition-all hover:shadow-xl hover:-translate-y-1 ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
               style={getItemDelay(i)}
             >
-              <div className="flex h-40 items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10 transition-colors group-hover:from-primary/20 group-hover:to-accent/20">
-                <f.icon className="h-16 w-16 text-primary/70 transition-transform group-hover:scale-110" />
+              <div className="flex h-40 items-center justify-center bg-gradient-to-br from-secondary/30 to-secondary/10 transition-colors group-hover:from-secondary/40 group-hover:to-secondary/20">
+                <f.icon className="h-16 w-16 text-secondary transition-transform group-hover:scale-110" />
               </div>
               <div className="p-5">
                 <h3 className="font-display text-lg font-semibold text-foreground">{f.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{f.desc}</p>
+                <p className="mt-2 text-sm text-foreground/80">{f.desc}</p>
               </div>
             </div>
           ))}
