@@ -18,6 +18,7 @@ const GradeManager = () => {
   const [selectedTerm, setSelectedTerm] = useState('');
   const [students, setStudents] = useState<any[]>([]);
   const [marks, setMarks] = useState<Record<string, { marks: number; grade_letter: string; existingId?: string }>>({});
+  const [totalMarks, setTotalMarks] = useState<number>(100);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -71,21 +72,30 @@ const GradeManager = () => {
 
   useEffect(() => { if (selectedCourse && selectedTerm) loadStudents(); }, [selectedCourse, selectedTerm]);
 
-  const getGradeLetter = (m: number): string => {
-    if (m >= 90) return 'A+';
-    if (m >= 80) return 'A';
-    if (m >= 70) return 'B';
-    if (m >= 60) return 'C';
-    if (m >= 50) return 'D';
+  const getGradeLetter = (m: number, total: number): string => {
+    const pct = total > 0 ? (m / total) * 100 : 0;
+    if (pct >= 90) return 'A+';
+    if (pct >= 80) return 'A';
+    if (pct >= 70) return 'B';
+    if (pct >= 60) return 'C';
+    if (pct >= 50) return 'D';
     return 'F';
   };
 
   const updateMark = (studentId: string, value: number) => {
     setMarks(prev => ({
       ...prev,
-      [studentId]: { ...prev[studentId], marks: value, grade_letter: getGradeLetter(value) }
+      [studentId]: { ...prev[studentId], marks: value, grade_letter: getGradeLetter(value, totalMarks) }
     }));
   };
+
+  // Recompute grade letters when totalMarks changes
+  useEffect(() => {
+    setMarks(prev => Object.fromEntries(
+      Object.entries(prev).map(([id, d]) => [id, { ...d, grade_letter: getGradeLetter(d.marks, totalMarks) }])
+    ));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totalMarks]);
 
   const saveAllGrades = async () => {
     setSaving(true);
@@ -136,6 +146,17 @@ const GradeManager = () => {
             {TERMS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
           </SelectContent>
         </Select>
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground whitespace-nowrap">Total Marks:</span>
+          <Input
+            type="number"
+            min={1}
+            className="w-24"
+            value={totalMarks}
+            onChange={e => setTotalMarks(Math.max(1, parseInt(e.target.value) || 1))}
+          />
+        </div>
       </div>
 
       {selectedCourse && selectedTerm && (
@@ -161,7 +182,7 @@ const GradeManager = () => {
                     <TableRow>
                       <TableHead>Roll No</TableHead>
                       <TableHead>Student Name</TableHead>
-                      <TableHead>Marks (out of 100)</TableHead>
+                      <TableHead>Marks (out of {totalMarks})</TableHead>
                       <TableHead>Grade</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
@@ -175,10 +196,10 @@ const GradeManager = () => {
                           <Input
                             type="number"
                             min={0}
-                            max={100}
+                            max={totalMarks}
                             className="w-24"
                             value={marks[s.id]?.marks ?? 0}
-                            onChange={e => updateMark(s.id, Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                            onChange={e => updateMark(s.id, Math.min(totalMarks, Math.max(0, parseInt(e.target.value) || 0)))}
                           />
                         </TableCell>
                         <TableCell className="font-bold text-primary">{marks[s.id]?.grade_letter || '—'}</TableCell>
