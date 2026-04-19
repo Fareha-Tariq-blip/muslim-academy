@@ -44,18 +44,13 @@ const AdminReviews = () => {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <h2 className="font-display text-2xl font-bold text-foreground">Community Reviews</h2>
-          <div className="flex gap-2">
-            {(['all','pending','approved'] as const).map(s => (
-              <Button key={s} variant={statusFilter === s ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter(s)} className="capitalize">{s}</Button>
-            ))}
-          </div>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h2 className="font-display text-2xl font-bold text-foreground">Community Reviews</h2>
+        <div className="flex gap-2">
+          {(['all','pending','approved'] as const).map(s => (
+            <Button key={s} variant={statusFilter === s ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter(s)} className="capitalize">{s}</Button>
+          ))}
         </div>
-        <p className="text-sm text-muted-foreground">
-          Moderate reviews submitted by parents, students, and community members. Approve them to display on the public Community page, reject to hide, or delete to remove permanently.
-        </p>
       </div>
       <Card>
         <CardContent className="p-0">
