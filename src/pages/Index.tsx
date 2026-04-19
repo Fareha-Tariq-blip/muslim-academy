@@ -6,7 +6,6 @@ import CurriculumPreview from '@/components/home/CurriculumPreview';
 import Achievements from '@/components/home/Achievements';
 import Facilities from '@/components/home/Facilities';
 import Testimonials from '@/components/home/Testimonials';
-import CommunityReviews from '@/components/home/CommunityReviews';
 import ContactSection from '@/components/home/ContactSection';
 import { useEffect, useState } from 'react';
 
@@ -31,9 +30,8 @@ const Index = () => {
       <CurriculumPreview />
       <Achievements />
       <Facilities />
-      <Testimonials />
-      <CommunityReviews />
-      <ContactSection />
+        <Testimonials />
+        <ContactSection />
       <Footer />
     </div>
   );

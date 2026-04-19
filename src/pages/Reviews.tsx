@@ -1,30 +1,25 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import CommunityPosts from '@/components/community/CommunityPosts';
+import CommunityReviews from '@/components/home/CommunityReviews';
 
-const Community = () => {
+const Reviews = () => {
   return (
     <div className="min-h-screen">
       <Header />
-      {/* Page header banner */}
       <div className="page-header-banner pt-24 pb-12">
         <div className="relative container mx-auto px-4 text-center">
           <h1 className="font-display text-4xl font-bold text-[hsl(40,30%,96%)] md:text-5xl">
-            Our <span className="text-[hsl(174,55%,55%)]">Community</span>
+            Reviews & <span className="text-[hsl(174,55%,55%)]">Stories</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-[hsl(40,20%,80%)]">
-            Share posts and connect with the Muslim Academy community.
+            Read what parents, students, and teachers say about Muslim Academy — and share your own.
           </p>
         </div>
       </div>
-      <section className="py-16 unified-section">
-        <div className="container mx-auto px-4">
-          <CommunityPosts />
-        </div>
-      </section>
+      <CommunityReviews />
       <Footer />
     </div>
   );
 };
 
-export default Community;
+export default Reviews;

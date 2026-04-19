@@ -8,10 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Quote, Send, Loader2, ImagePlus, LogIn } from 'lucide-react';
+import { Quote, Send, Loader2, ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useScrollAnimation, useStaggerAnimation } from '@/hooks/useScrollAnimation';
-import { Link } from 'react-router-dom';
 
 const CommunityReviews = () => {
   const { user } = useAuth();
@@ -33,7 +32,6 @@ const CommunityReviews = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) { toast.error('You must be logged in to post a review'); return; }
     setSaving(true);
     let imageUrl: string | null = null;
 
@@ -48,7 +46,7 @@ const CommunityReviews = () => {
     }
 
     const { error } = await supabase.from('reviews').insert({
-      name: form.name, role: form.role, content: form.content, image_url: imageUrl, user_id: user.id,
+      name: form.name, role: form.role, content: form.content, image_url: imageUrl, user_id: user?.id || null,
     });
 
     if (error) toast.error(error.message);
@@ -65,12 +63,12 @@ const CommunityReviews = () => {
     <section className="py-20 unified-section">
       <div className="container mx-auto px-4">
         <div ref={headerRef} className={`text-center mb-12 transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Community</span>
+          <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Community Voices</span>
           <h2 className="font-display text-3xl font-bold text-foreground mt-2 md:text-4xl">
             Reviews & <span className="text-primary">Stories</span>
           </h2>
           <p className="mt-3 text-muted-foreground max-w-lg mx-auto">
-            Hear from our parents and students about their experiences at Muslim Academy
+            Hear from our parents, students, and teachers — and share your own experience with the Muslim Academy community.
           </p>
         </div>
 
@@ -79,16 +77,16 @@ const CommunityReviews = () => {
             {reviews.map((r, i) => (
               <Card
                 key={r.id}
-                className={`overflow-hidden border-primary/20 bg-card/80 transition-all hover:shadow-xl hover:-translate-y-1 ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
+                className={`overflow-hidden border-2 border-secondary/40 bg-gradient-to-br from-secondary/25 via-card/90 to-secondary/15 transition-all hover:shadow-xl hover:-translate-y-1 hover:border-secondary/60 ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
                 style={getItemDelay(i)}
               >
                 {r.image_url && <img src={r.image_url} alt="" className="w-full h-48 object-cover" />}
                 <CardContent className="p-6">
-                  <Quote className="h-6 w-6 text-primary/30 mb-2" />
+                  <Quote className="h-6 w-6 text-secondary/60 mb-2" />
                   <p className="text-foreground italic leading-relaxed text-sm">"{r.content}"</p>
                   <div className="mt-4 flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-xs font-bold text-primary">{r.name?.[0]?.toUpperCase()}</span>
+                    <div className="h-8 w-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shadow-md shadow-secondary/30">
+                      <span className="text-xs font-bold">{r.name?.[0]?.toUpperCase()}</span>
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-foreground">{r.name}</p>
@@ -106,57 +104,50 @@ const CommunityReviews = () => {
         )}
 
         <div className="text-center">
-          {user ? (
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="lg" className="gap-2">
-                  <Send className="h-4 w-4" /> Share Your Experience
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader><DialogTitle>Write a Review</DialogTitle></DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Your Name</Label>
-                    <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>You are a</Label>
-                    <Select value={form.role} onValueChange={v => setForm(f => ({ ...f, role: v }))}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="parent">Parent</SelectItem>
-                        <SelectItem value="student">Student</SelectItem>
-                        <SelectItem value="alumni">Alumni</SelectItem>
-                        <SelectItem value="community member">Community Member</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Your Review</Label>
-                    <Textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} placeholder="Share your experience..." rows={4} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Photo (optional)</Label>
-                    <div className="flex items-center gap-2">
-                      <Input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] || null)} className="flex-1" />
-                      {file && <ImagePlus className="h-4 w-4 text-muted-foreground" />}
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Your review will be visible after admin approval.</p>
-                  <Button type="submit" className="w-full" disabled={saving}>
-                    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Submit Review
-                  </Button>
-                </form>
-              </DialogContent>
-            </Dialog>
-          ) : (
-            <Link to="/login">
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
               <Button size="lg" className="gap-2">
-                <LogIn className="h-4 w-4" /> Login to Share Your Experience
+                <Send className="h-4 w-4" /> Share Your Experience
               </Button>
-            </Link>
-          )}
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Write a Review</DialogTitle></DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Your Name</Label>
+                  <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>You are a</Label>
+                  <Select value={form.role} onValueChange={v => setForm(f => ({ ...f, role: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="parent">Parent</SelectItem>
+                      <SelectItem value="student">Student</SelectItem>
+                      <SelectItem value="teacher">Teacher</SelectItem>
+                      <SelectItem value="alumni">Alumni</SelectItem>
+                      <SelectItem value="community member">Community Member</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Your Review</Label>
+                  <Textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} placeholder="Share your experience..." rows={4} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Photo (optional)</Label>
+                  <div className="flex items-center gap-2">
+                    <Input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] || null)} className="flex-1" />
+                    {file && <ImagePlus className="h-4 w-4 text-muted-foreground" />}
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">Your review will be visible after admin approval. No login required.</p>
+                <Button type="submit" className="w-full" disabled={saving}>
+                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Submit Review
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </section>

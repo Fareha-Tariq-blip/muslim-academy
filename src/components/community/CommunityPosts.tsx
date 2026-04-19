@@ -210,7 +210,7 @@ const CommunityPosts = ({ basePath }: Props) => {
         <p className="text-center text-muted-foreground py-8">No posts yet. Be the first to share!</p>
       ) : (
         posts.map(post => (
-          <Card key={post.id} className="overflow-hidden">
+          <Card key={post.id} className="overflow-hidden border-2 border-secondary/40 bg-gradient-to-br from-secondary/20 via-card/95 to-secondary/10 hover:shadow-xl hover:border-secondary/60 transition-all">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
                 <Avatar className="h-10 w-10">
