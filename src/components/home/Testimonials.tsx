@@ -29,8 +29,8 @@ const Testimonials = () => {
         </div>
 
         <div className="mx-auto max-w-2xl">
-          <div className="relative rounded-2xl border border-primary/20 bg-card/80 p-8 text-center shadow-lg">
-            <Quote className="mx-auto mb-4 h-10 w-10 text-primary/30" />
+          <div className="relative rounded-2xl border-2 border-secondary/40 bg-gradient-to-br from-secondary/25 via-card/90 to-secondary/15 p-8 text-center shadow-lg">
+            <Quote className="mx-auto mb-4 h-10 w-10 text-secondary/60" />
             <p className="text-lg text-foreground italic leading-relaxed">"{t.text}"</p>
             <div className="mt-6">
               <p className="font-display font-semibold text-foreground">{t.name}</p>
