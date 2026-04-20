@@ -47,7 +47,7 @@ const About = () => {
           {features.map((f, i) => (
             <div
               key={i}
-              className={`group rounded-xl border-2 border-secondary/40 bg-gradient-to-br from-secondary/25 via-secondary/15 to-accent/20 p-6 text-center transition-all hover:shadow-xl hover:-translate-y-1 hover:border-secondary/60 ${getItemClass(i)}`}
+              className={`group rounded-xl border-2 border-secondary/40 bg-gradient-to-br from-secondary/30 via-card/80 to-secondary/20 p-6 text-center shadow-md transition-all hover:shadow-xl hover:-translate-y-1 hover:border-secondary/70 hover:from-secondary/40 hover:to-secondary/30 ${getItemClass(i)}`}
               style={getItemDelay(i)}
             >
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-secondary text-secondary-foreground transition-transform group-hover:scale-110 shadow-lg shadow-secondary/30">
