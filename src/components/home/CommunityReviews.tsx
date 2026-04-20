@@ -84,19 +84,19 @@ const CommunityReviews = ({ hideHeader = false }: Props) => {
             {reviews.map((r, i) => (
               <Card
                 key={r.id}
-                className={`overflow-hidden border-2 border-secondary/40 bg-gradient-to-br from-secondary/25 via-card/90 to-secondary/15 shadow-lg transition-all hover:-translate-y-1 hover:border-secondary/70 hover:shadow-xl ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
+                className={`overflow-hidden border-2 border-secondary/50 bg-card shadow-lg transition-all hover:-translate-y-1 hover:border-secondary/70 hover:shadow-xl ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
                 style={getItemDelay(i)}
               >
                 {r.image_url && <img src={r.image_url} alt={`${r.name} review`} className="w-full h-48 object-cover" />}
-                <CardContent className="p-6">
+                <CardContent className="p-6 bg-card">
                   <Quote className="h-6 w-6 text-secondary mb-2" />
-                  <p className="text-sm italic leading-relaxed text-foreground">"{r.content}"</p>
+                  <p className="text-sm italic leading-relaxed text-card-foreground">"{r.content}"</p>
                   <div className="mt-4 flex items-center gap-2">
                     <div className="h-8 w-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shadow-md shadow-secondary/30">
                       <span className="text-xs font-bold">{r.name?.[0]?.toUpperCase()}</span>
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-foreground">{r.name}</p>
+                      <p className="text-sm font-semibold text-card-foreground">{r.name}</p>
                       <p className="text-xs text-muted-foreground capitalize">{r.role}</p>
                     </div>
                   </div>
