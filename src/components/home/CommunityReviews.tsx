@@ -84,7 +84,7 @@ const CommunityReviews = ({ hideHeader = false }: Props) => {
             {reviews.map((r, i) => (
               <Card
                 key={r.id}
-                className={`overflow-hidden border-2 border-secondary/40 bg-gradient-to-br from-secondary/25 via-card/90 to-secondary/15 transition-all hover:shadow-xl hover:-translate-y-1 hover:border-secondary/60 ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
+                className={`overflow-hidden border-2 border-secondary/40 bg-gradient-to-br from-secondary/30 via-card/80 to-secondary/20 shadow-md transition-all hover:shadow-xl hover:-translate-y-1 hover:border-secondary/70 hover:from-secondary/40 hover:to-secondary/30 ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
                 style={getItemDelay(i)}
               >
                 {r.image_url && <img src={r.image_url} alt="" className="w-full h-48 object-cover" />}
