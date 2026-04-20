@@ -12,7 +12,12 @@ import { Quote, Send, Loader2, ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useScrollAnimation, useStaggerAnimation } from '@/hooks/useScrollAnimation';
 
-const CommunityReviews = () => {
+interface Props {
+  /** Hide the header section when used in a page that already has one */
+  hideHeader?: boolean;
+}
+
+const CommunityReviews = ({ hideHeader = false }: Props) => {
   const { user } = useAuth();
   const [reviews, setReviews] = useState<any[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -62,15 +67,17 @@ const CommunityReviews = () => {
   return (
     <section className="py-20 unified-section">
       <div className="container mx-auto px-4">
-        <div ref={headerRef} className={`text-center mb-12 transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Community Voices</span>
-          <h2 className="font-display text-3xl font-bold text-foreground mt-2 md:text-4xl">
-            Reviews & <span className="text-primary">Stories</span>
-          </h2>
-          <p className="mt-3 text-muted-foreground max-w-lg mx-auto">
-            Hear from our parents, students, and teachers — and share your own experience with the Muslim Academy community.
-          </p>
-        </div>
+        {!hideHeader && (
+          <div ref={headerRef} className={`text-center mb-12 transition-all duration-700 ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Community Voices</span>
+            <h2 className="font-display text-3xl font-bold text-foreground mt-2 md:text-4xl">
+              Reviews & <span className="text-primary">Stories</span>
+            </h2>
+            <p className="mt-3 text-muted-foreground max-w-lg mx-auto">
+              Hear from our parents, students, and teachers — and share your own experience with the Muslim Academy community.
+            </p>
+          </div>
+        )}
 
         {reviews.length > 0 ? (
           <div ref={cardsRef} className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-10">

@@ -16,7 +16,7 @@ const Reviews = () => {
           </p>
         </div>
       </div>
-      <CommunityReviews />
+      <CommunityReviews hideHeader />
       <Footer />
     </div>
   );

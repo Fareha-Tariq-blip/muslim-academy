@@ -167,7 +167,14 @@ const CommunityPosts = ({ basePath }: Props) => {
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
-      <h2 className="font-display text-2xl font-bold text-foreground">Community</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="font-display text-2xl font-bold text-foreground">Community</h2>
+        {!user && (
+          <Button onClick={() => toast.error('Please log in to post')} size="sm">
+            <Send className="h-4 w-4 mr-1" /> Login to Post
+          </Button>
+        )}
+      </div>
 
       {user ? (
         <Card>
@@ -200,9 +207,7 @@ const CommunityPosts = ({ basePath }: Props) => {
             </form>
           </CardContent>
         </Card>
-      ) : (
-        <Card><CardContent className="p-4 text-sm text-muted-foreground">Log in to share a post.</CardContent></Card>
-      )}
+      ) : null}
 
       {loading ? (
         <div className="text-center py-8"><Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" /></div>
