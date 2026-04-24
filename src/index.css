@@ -48,6 +48,9 @@
     --success: 160 50% 38%;
     --warning: 38 92% 50%;
     --info: 174 55% 40%;
+    --review-card: 40 25% 98%;
+    --review-card-foreground: 210 40% 14%;
+    --review-card-muted: 210 15% 38%;
 
     /* Navy theme token */
     --navy: 210 45% 12%;
@@ -86,6 +89,9 @@
     --sidebar-accent-foreground: 40 20% 93%;
     --sidebar-border: 210 35% 18%;
     --sidebar-ring: 174 55% 50%;
+    --review-card: 40 25% 96%;
+    --review-card-foreground: 210 40% 14%;
+    --review-card-muted: 210 15% 38%;
   }
 }
 
