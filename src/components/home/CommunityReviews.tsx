@@ -109,7 +109,7 @@ const CommunityReviews = ({ hideHeader = false }: Props) => {
             {reviews.map((r, i) => (
               <Card
                 key={r.id}
-                className={`overflow-hidden border-2 border-secondary/60 bg-[hsl(var(--review-card))] text-[hsl(var(--review-card-foreground))] shadow-lg shadow-secondary/10 transition-all hover:-translate-y-1 hover:border-secondary/80 hover:shadow-xl ${getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
+                className={`overflow-hidden border-2 border-secondary/60 bg-[hsl(var(--review-card))] text-[hsl(var(--review-card-foreground))] shadow-lg shadow-secondary/10 transition-all hover:-translate-y-1 hover:border-secondary/80 hover:shadow-xl ${hideHeader ? 'opacity-100 translate-x-0 translate-y-0 scale-100' : getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
                 style={getItemDelay(i)}
               >
                 {r.image_url && <img src={r.image_url} alt={`${r.name} review`} className="w-full h-48 object-cover" />}
