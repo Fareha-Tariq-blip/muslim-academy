@@ -85,7 +85,7 @@ const CommunityReviews = ({ hideHeader = false }: Props) => {
         {loading ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-10">
             {[0, 1, 2].map((i) => (
-              <Card key={i} className="overflow-hidden border-2 border-secondary/40 bg-[hsl(var(--review-card))] shadow-lg animate-pulse">
+              <Card key={i} className="overflow-hidden border-2 border-secondary/50 bg-gradient-to-br from-secondary/30 via-[hsl(var(--review-card))] to-primary/10 shadow-lg shadow-secondary/10 animate-pulse">
                 <CardContent className="p-6 space-y-4">
                   <div className="h-6 w-6 rounded bg-secondary/30" />
                   <div className="space-y-2">
@@ -109,11 +109,11 @@ const CommunityReviews = ({ hideHeader = false }: Props) => {
             {reviews.map((r, i) => (
               <Card
                 key={r.id}
-                className={`overflow-hidden border-2 border-secondary/60 bg-[hsl(var(--review-card))] text-[hsl(var(--review-card-foreground))] shadow-lg shadow-secondary/10 transition-all hover:-translate-y-1 hover:border-secondary/80 hover:shadow-xl ${hideHeader ? 'opacity-100 translate-x-0 translate-y-0 scale-100' : getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
+                className={`overflow-hidden border-2 border-secondary/60 bg-gradient-to-br from-secondary/35 via-[hsl(var(--review-card))] to-primary/15 text-[hsl(var(--review-card-foreground))] shadow-lg shadow-secondary/10 transition-all hover:-translate-y-1 hover:border-secondary/80 hover:shadow-xl ${hideHeader ? 'opacity-100 translate-x-0 translate-y-0 scale-100' : getItemClass(i, i % 2 === 0 ? 'left' : 'right')}`}
                 style={getItemDelay(i)}
               >
                 {r.image_url && <img src={r.image_url} alt={`${r.name} review`} className="w-full h-48 object-cover" />}
-                <CardContent className="p-6 bg-[hsl(var(--review-card))]">
+                <CardContent className="p-6 bg-gradient-to-br from-transparent via-secondary/5 to-primary/5">
                   <Quote className="h-6 w-6 text-secondary mb-2" />
                   <p className="text-sm italic leading-relaxed text-[hsl(var(--review-card-foreground))]">"{r.content}"</p>
                   <div className="mt-4 flex items-center gap-2">
