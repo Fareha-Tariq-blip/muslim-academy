@@ -177,7 +177,7 @@ const CommunityPosts = ({ basePath }: Props) => {
       </div>
 
       {user ? (
-        <Card>
+        <Card className="border-2 border-secondary/50 bg-gradient-to-br from-secondary/30 via-card to-primary/10 shadow-lg shadow-secondary/10">
           <CardContent className="p-4">
             <form onSubmit={handlePost} className="space-y-3">
               <Textarea
@@ -215,7 +215,7 @@ const CommunityPosts = ({ basePath }: Props) => {
         <p className="text-center text-muted-foreground py-8">No posts yet. Be the first to share!</p>
       ) : (
         posts.map(post => (
-          <Card key={post.id} className="overflow-hidden border-2 border-secondary/40 bg-gradient-to-br from-secondary/20 via-card/95 to-secondary/10 hover:shadow-xl hover:border-secondary/60 transition-all">
+          <Card key={post.id} className="overflow-hidden border-2 border-secondary/55 bg-gradient-to-br from-secondary/35 via-card to-primary/15 shadow-lg shadow-secondary/10 hover:shadow-xl hover:border-secondary/75 transition-all">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
                 <Avatar className="h-10 w-10">
@@ -267,7 +267,7 @@ const CommunityPosts = ({ basePath }: Props) => {
                               {r.author_name?.[0]?.toUpperCase() || 'U'}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="flex-1 bg-muted/50 rounded-lg px-3 py-2">
+                          <div className="flex-1 rounded-lg border border-secondary/20 bg-gradient-to-br from-muted/90 to-secondary/10 px-3 py-2">
                             <div className="flex items-center gap-2">
                               <p className="text-xs font-semibold text-foreground">{r.author_name}</p>
                               <span className="text-[10px] text-muted-foreground">
