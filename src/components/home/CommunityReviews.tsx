@@ -20,6 +20,7 @@ interface Props {
 const CommunityReviews = ({ hideHeader = false }: Props) => {
   const { user } = useAuth();
   const [reviews, setReviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: '', role: 'parent', content: '' });
@@ -29,8 +30,10 @@ const CommunityReviews = ({ hideHeader = false }: Props) => {
 
   useEffect(() => {
     const fetchReviews = async () => {
+      setLoading(true);
       const { data } = await supabase.from('reviews').select('*').eq('approved', true).order('created_at', { ascending: false }).limit(12);
       setReviews(data || []);
+      setLoading(false);
     };
     fetchReviews();
   }, []);
@@ -79,7 +82,29 @@ const CommunityReviews = ({ hideHeader = false }: Props) => {
           </div>
         )}
 
-        {reviews.length > 0 ? (
+        {loading ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-10">
+            {[0, 1, 2].map((i) => (
+              <Card key={i} className="overflow-hidden border-2 border-secondary/40 bg-[hsl(var(--review-card))] shadow-lg animate-pulse">
+                <CardContent className="p-6 space-y-4">
+                  <div className="h-6 w-6 rounded bg-secondary/30" />
+                  <div className="space-y-2">
+                    <div className="h-3 w-full rounded bg-secondary/20" />
+                    <div className="h-3 w-5/6 rounded bg-secondary/20" />
+                    <div className="h-3 w-2/3 rounded bg-secondary/20" />
+                  </div>
+                  <div className="flex items-center gap-2 pt-2">
+                    <div className="h-8 w-8 rounded-full bg-secondary/30" />
+                    <div className="space-y-1">
+                      <div className="h-3 w-20 rounded bg-secondary/20" />
+                      <div className="h-2 w-12 rounded bg-secondary/20" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : reviews.length > 0 ? (
           <div ref={cardsRef} className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-10">
             {reviews.map((r, i) => (
               <Card
