@@ -135,7 +135,7 @@ const StudentGrades = () => {
                             <TableRow key={g.id}>
                               <TableCell className="font-medium">{(g.courses as any)?.name || 'Unknown'}</TableCell>
                               <TableCell><Badge variant="outline">{g.term}</Badge></TableCell>
-                              <TableCell className="font-bold">{g.marks}/100</TableCell>
+                              <TableCell className="font-bold">{g.marks}/{g.total_marks ?? 100}</TableCell>
                               <TableCell>{g.grade_letter ? <Badge variant="secondary">{g.grade_letter}</Badge> : '—'}</TableCell>
                             </TableRow>
                           ))}
