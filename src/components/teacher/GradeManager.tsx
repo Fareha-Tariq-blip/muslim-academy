@@ -17,7 +17,7 @@ const GradeManager = () => {
   const [selectedCourse, setSelectedCourse] = useState('');
   const [selectedTerm, setSelectedTerm] = useState('');
   const [students, setStudents] = useState<any[]>([]);
-  const [marks, setMarks] = useState<Record<string, { marks: number; grade_letter: string; existingId?: string }>>({});
+  const [marks, setMarks] = useState<Record<string, { marks: number | ''; grade_letter: string; existingId?: string }>>({});
   const [totalMarks, setTotalMarks] = useState<number>(100);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
