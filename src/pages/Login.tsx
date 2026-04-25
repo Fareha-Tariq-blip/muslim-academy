@@ -125,15 +125,6 @@ const Login = () => {
                         Continue to Dashboard
                       </Button>
                     </form>
- 
-                    <div className="mt-5 rounded-2xl border border-accent/20 bg-accent/10 p-4 text-xs text-muted-foreground">
-                      <p className="mb-2 font-semibold text-foreground">Demo Accounts</p>
-                      <div className="space-y-1.5">
-                        <p>Admin: admin@muslimacademy.com / admin123</p>
-                        <p>Teacher: teacher1@muslimacademy.com / teacher123</p>
-                        <p>Student: student1@muslimacademy.com / student123</p>
-                      </div>
-                    </div>
                   </CardContent>
                 </Card>
               </div>
