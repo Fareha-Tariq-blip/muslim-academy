@@ -82,17 +82,18 @@ const GradeManager = () => {
     return 'F';
   };
 
-  const updateMark = (studentId: string, value: number) => {
+  const updateMark = (studentId: string, value: number | '') => {
+    const num = value === '' ? 0 : value;
     setMarks(prev => ({
       ...prev,
-      [studentId]: { ...prev[studentId], marks: value, grade_letter: getGradeLetter(value, totalMarks) }
+      [studentId]: { ...prev[studentId], marks: value, grade_letter: getGradeLetter(num, totalMarks) }
     }));
   };
 
   // Recompute grade letters when totalMarks changes
   useEffect(() => {
     setMarks(prev => Object.fromEntries(
-      Object.entries(prev).map(([id, d]) => [id, { ...d, grade_letter: getGradeLetter(d.marks, totalMarks) }])
+      Object.entries(prev).map(([id, d]) => [id, { ...d, grade_letter: getGradeLetter(d.marks === '' ? 0 : d.marks, totalMarks) }])
     ));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalMarks]);
@@ -101,18 +102,21 @@ const GradeManager = () => {
     setSaving(true);
     try {
       for (const [studentId, data] of Object.entries(marks)) {
+        const numMarks = data.marks === '' ? 0 : data.marks;
         if (data.existingId) {
           await supabase.from('grades').update({
-            marks: data.marks,
+            marks: numMarks,
             grade_letter: data.grade_letter,
+            total_marks: totalMarks,
           }).eq('id', data.existingId);
         } else {
           await supabase.from('grades').insert({
             student_id: studentId,
             course_id: selectedCourse,
             term: selectedTerm,
-            marks: data.marks,
+            marks: numMarks,
             grade_letter: data.grade_letter,
+            total_marks: totalMarks,
           });
         }
       }
