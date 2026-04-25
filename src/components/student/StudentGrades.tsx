@@ -37,9 +37,9 @@ const StudentGrades = () => {
 
   if (loading) return <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
-  // Term grades stats
-  const totalMarks = grades.reduce((sum, g) => sum + g.marks, 0);
-  const avgMarks = grades.length ? Math.round(totalMarks / grades.length) : 0;
+  // Term grades stats — percentage based on each grade's own total
+  const percentages = grades.map(g => g.total_marks > 0 ? (g.marks / g.total_marks) * 100 : 0);
+  const avgMarks = percentages.length ? Math.round(percentages.reduce((a, b) => a + b, 0) / percentages.length) : 0;
   const highest = grades.length ? Math.max(...grades.map(g => g.marks)) : 0;
   const lowest = grades.length ? Math.min(...grades.map(g => g.marks)) : 0;
 
