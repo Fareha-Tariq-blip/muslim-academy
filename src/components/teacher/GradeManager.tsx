@@ -202,8 +202,14 @@ const GradeManager = () => {
                             min={0}
                             max={totalMarks}
                             className="w-24"
-                            value={marks[s.id]?.marks ?? 0}
-                            onChange={e => updateMark(s.id, Math.min(totalMarks, Math.max(0, parseInt(e.target.value) || 0)))}
+                            value={marks[s.id]?.marks ?? ''}
+                            onChange={e => {
+                              const v = e.target.value;
+                              if (v === '') { updateMark(s.id, ''); return; }
+                              const n = parseInt(v);
+                              if (isNaN(n)) return;
+                              updateMark(s.id, Math.min(totalMarks, Math.max(0, n)));
+                            }}
                           />
                         </TableCell>
                         <TableCell className="font-bold text-primary">{marks[s.id]?.grade_letter || '—'}</TableCell>
