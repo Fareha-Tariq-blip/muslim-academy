@@ -406,6 +406,7 @@ export type Database = {
           marks: number
           student_id: string
           term: string
+          total_marks: number
           updated_at: string
         }
         Insert: {
@@ -416,6 +417,7 @@ export type Database = {
           marks?: number
           student_id: string
           term: string
+          total_marks?: number
           updated_at?: string
         }
         Update: {
@@ -426,6 +428,7 @@ export type Database = {
           marks?: number
           student_id?: string
           term?: string
+          total_marks?: number
           updated_at?: string
         }
         Relationships: [

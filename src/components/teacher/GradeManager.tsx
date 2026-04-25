@@ -17,7 +17,7 @@ const GradeManager = () => {
   const [selectedCourse, setSelectedCourse] = useState('');
   const [selectedTerm, setSelectedTerm] = useState('');
   const [students, setStudents] = useState<any[]>([]);
-  const [marks, setMarks] = useState<Record<string, { marks: number; grade_letter: string; existingId?: string }>>({});
+  const [marks, setMarks] = useState<Record<string, { marks: number | ''; grade_letter: string; existingId?: string }>>({});
   const [totalMarks, setTotalMarks] = useState<number>(100);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -82,17 +82,18 @@ const GradeManager = () => {
     return 'F';
   };
 
-  const updateMark = (studentId: string, value: number) => {
+  const updateMark = (studentId: string, value: number | '') => {
+    const num = value === '' ? 0 : value;
     setMarks(prev => ({
       ...prev,
-      [studentId]: { ...prev[studentId], marks: value, grade_letter: getGradeLetter(value, totalMarks) }
+      [studentId]: { ...prev[studentId], marks: value, grade_letter: getGradeLetter(num, totalMarks) }
     }));
   };
 
   // Recompute grade letters when totalMarks changes
   useEffect(() => {
     setMarks(prev => Object.fromEntries(
-      Object.entries(prev).map(([id, d]) => [id, { ...d, grade_letter: getGradeLetter(d.marks, totalMarks) }])
+      Object.entries(prev).map(([id, d]) => [id, { ...d, grade_letter: getGradeLetter(d.marks === '' ? 0 : d.marks, totalMarks) }])
     ));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalMarks]);
@@ -101,18 +102,21 @@ const GradeManager = () => {
     setSaving(true);
     try {
       for (const [studentId, data] of Object.entries(marks)) {
+        const numMarks = data.marks === '' ? 0 : data.marks;
         if (data.existingId) {
           await supabase.from('grades').update({
-            marks: data.marks,
+            marks: numMarks,
             grade_letter: data.grade_letter,
+            total_marks: totalMarks,
           }).eq('id', data.existingId);
         } else {
           await supabase.from('grades').insert({
             student_id: studentId,
             course_id: selectedCourse,
             term: selectedTerm,
-            marks: data.marks,
+            marks: numMarks,
             grade_letter: data.grade_letter,
+            total_marks: totalMarks,
           });
         }
       }
@@ -198,8 +202,14 @@ const GradeManager = () => {
                             min={0}
                             max={totalMarks}
                             className="w-24"
-                            value={marks[s.id]?.marks ?? 0}
-                            onChange={e => updateMark(s.id, Math.min(totalMarks, Math.max(0, parseInt(e.target.value) || 0)))}
+                            value={marks[s.id]?.marks ?? ''}
+                            onChange={e => {
+                              const v = e.target.value;
+                              if (v === '') { updateMark(s.id, ''); return; }
+                              const n = parseInt(v);
+                              if (isNaN(n)) return;
+                              updateMark(s.id, Math.min(totalMarks, Math.max(0, n)));
+                            }}
                           />
                         </TableCell>
                         <TableCell className="font-bold text-primary">{marks[s.id]?.grade_letter || '—'}</TableCell>
