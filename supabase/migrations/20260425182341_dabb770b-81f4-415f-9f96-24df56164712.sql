@@ -1,0 +1,1 @@
+ALTER TABLE public.grades ADD COLUMN IF NOT EXISTS total_marks integer NOT NULL DEFAULT 100;
