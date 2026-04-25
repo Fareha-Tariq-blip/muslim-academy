@@ -11,16 +11,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus, Loader2, Bell, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const CLASSES = ['1','2','3','4','5','6','7','8','9','10','11','12'];
-const SECTIONS = ['A','B','C'];
-
 const AdminAnnouncements = () => {
   const { user } = useAuth();
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ title: '', content: '', target_class: 'all', target_section: 'all' });
+  const [form, setForm] = useState({ title: '', content: '', target_audience: 'all' });
 
   const fetchAnnouncements = async () => {
     setLoading(true);
@@ -38,15 +35,15 @@ const AdminAnnouncements = () => {
       title: form.title,
       content: form.content,
       author_id: user?.id,
-      target_role: 'student' as any, // class targeting implies students
-      target_class: form.target_class === 'all' ? null : form.target_class,
-      target_section: form.target_section === 'all' ? null : form.target_section,
+      target_role: form.target_audience === 'all' ? null : (form.target_audience as any),
+      target_class: null,
+      target_section: null,
     });
     if (error) toast.error(error.message);
     else {
       toast.success('Announcement posted');
       setDialogOpen(false);
-      setForm({ title: '', content: '', target_class: 'all', target_section: 'all' });
+      setForm({ title: '', content: '', target_audience: 'all' });
       fetchAnnouncements();
     }
     setSaving(false);
@@ -75,27 +72,16 @@ const AdminAnnouncements = () => {
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="space-y-2"><Label>Title</Label><Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required /></div>
               <div className="space-y-2"><Label>Content</Label><Textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} rows={4} required /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>Target Class</Label>
-                  <Select value={form.target_class} onValueChange={v => setForm(f => ({ ...f, target_class: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Classes</SelectItem>
-                      {CLASSES.map(c => <SelectItem key={c} value={c}>Class {c}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Target Section</Label>
-                  <Select value={form.target_section} onValueChange={v => setForm(f => ({ ...f, target_section: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Sections</SelectItem>
-                      {SECTIONS.map(s => <SelectItem key={s} value={s}>Section {s}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2">
+                <Label>Audience</Label>
+                <Select value={form.target_audience} onValueChange={v => setForm(f => ({ ...f, target_audience: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Everyone (Teachers & Students)</SelectItem>
+                    <SelectItem value="teacher">Teachers Only</SelectItem>
+                    <SelectItem value="student">Students Only</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <Button type="submit" className="w-full" disabled={saving}>
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Post Announcement
@@ -130,7 +116,7 @@ const AdminAnnouncements = () => {
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">{a.content}</p>
                     <span className="mt-2 inline-block rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                      For: {a.target_class ? `Class ${a.target_class}${a.target_section ? `-${a.target_section}` : ''}` : 'All Classes'}
+                      For: {a.target_role === 'teacher' ? 'Teachers' : a.target_role === 'student' ? 'Students' : 'Everyone'}
                     </span>
                   </div>
                 </div>
