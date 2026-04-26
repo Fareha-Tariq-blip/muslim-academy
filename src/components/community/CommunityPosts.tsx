@@ -40,7 +40,7 @@ interface Props {
 }
 
 const CommunityPosts = ({ basePath }: Props) => {
-  const { user, role } = useAuth();
+  const { user, role, loading: authLoading } = useAuth();
   const isAdmin = role === 'admin';
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
