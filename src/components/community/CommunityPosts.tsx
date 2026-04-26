@@ -169,14 +169,20 @@ const CommunityPosts = ({ basePath }: Props) => {
     <div className="space-y-6 max-w-2xl mx-auto">
       <div className="flex items-center justify-between">
         <h2 className="font-display text-2xl font-bold text-foreground">Community</h2>
-        {!user && (
+        {!authLoading && !user && (
           <Button onClick={() => toast.error('Please log in to post')} size="sm">
             <Send className="h-4 w-4 mr-1" /> Login to Post
           </Button>
         )}
       </div>
 
-      {user ? (
+      {authLoading ? (
+        <Card className="border-2 border-secondary/30 bg-card/50">
+          <CardContent className="p-6 flex items-center justify-center">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </CardContent>
+        </Card>
+      ) : user ? (
         <Card className="border-2 border-secondary/50 bg-gradient-to-br from-secondary/30 via-card to-primary/10 shadow-lg shadow-secondary/10">
           <CardContent className="p-4">
             <form onSubmit={handlePost} className="space-y-3">
