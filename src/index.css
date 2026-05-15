@@ -237,16 +237,16 @@
 /* Shadcn Card base class is "rounded-lg border bg-card text-card-foreground shadow-sm".
    Target it globally so every Card gets a tinted gradient + accent top stripe. */
 .bg-card {
-  background-color: transparent !important;
+  background-color: hsl(var(--card)) !important;
   background-image: linear-gradient(135deg,
-    hsl(var(--primary) / 0.10),
-    hsl(var(--accent) / 0.08) 50%,
-    hsl(var(--secondary) / 0.10)
+    hsl(var(--primary) / 0.08),
+    hsl(var(--accent) / 0.06) 50%,
+    hsl(var(--secondary) / 0.08)
   ) !important;
-  border-color: hsl(var(--primary) / 0.22) !important;
+  border-color: hsl(var(--primary) / 0.25) !important;
   box-shadow:
-    0 1px 0 hsl(var(--accent) / 0.30) inset,
-    0 6px 24px -10px hsl(var(--primary) / 0.25) !important;
+    0 1px 0 hsl(var(--accent) / 0.25) inset,
+    0 8px 24px -10px hsl(var(--primary) / 0.20) !important;
   position: relative;
   overflow: hidden;
 }
