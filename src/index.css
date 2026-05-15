@@ -232,50 +232,57 @@
   background: hsl(var(--navy));
 }
 
-/* ===== Colorful cards & tables across all dashboard panels ===== */
+/* ===== Colorful cards & tables across ALL pages and portals ===== */
 
-/* Cards inside the dashboard get a subtle gradient + colored top border */
-.dashboard-bg [data-slot="card"],
-.dashboard-bg .rounded-lg.border.bg-card,
-.dashboard-bg .rounded-xl.border.bg-card {
-  background-image: linear-gradient(135deg, hsl(var(--primary) / 0.06), hsl(var(--accent) / 0.05) 50%, hsl(var(--secondary) / 0.06));
-  border-color: hsl(var(--primary) / 0.18);
+/* Shadcn Card base class is "rounded-lg border bg-card text-card-foreground shadow-sm".
+   Target it globally so every Card gets a tinted gradient + accent top stripe. */
+.bg-card {
+  background-color: transparent !important;
+  background-image: linear-gradient(135deg,
+    hsl(var(--primary) / 0.10),
+    hsl(var(--accent) / 0.08) 50%,
+    hsl(var(--secondary) / 0.10)
+  ) !important;
+  border-color: hsl(var(--primary) / 0.22) !important;
   box-shadow:
-    0 1px 0 hsl(var(--accent) / 0.25) inset,
-    0 4px 20px -8px hsl(var(--primary) / 0.18);
+    0 1px 0 hsl(var(--accent) / 0.30) inset,
+    0 6px 24px -10px hsl(var(--primary) / 0.25) !important;
   position: relative;
   overflow: hidden;
 }
-.dashboard-bg [data-slot="card"]::before,
-.dashboard-bg .rounded-lg.border.bg-card::before,
-.dashboard-bg .rounded-xl.border.bg-card::before {
+.bg-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
   background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--secondary)));
-  opacity: 0.85;
+  opacity: 0.9;
   pointer-events: none;
+  z-index: 1;
 }
 
-/* Tables: colored header, zebra rows, hover accent */
-.dashboard-bg table thead {
-  background: linear-gradient(90deg, hsl(var(--primary) / 0.18), hsl(var(--accent) / 0.16), hsl(var(--secondary) / 0.18));
+/* Tables: colored header, zebra rows, hover accent — global */
+table thead {
+  background: linear-gradient(90deg,
+    hsl(var(--primary) / 0.20),
+    hsl(var(--accent) / 0.18),
+    hsl(var(--secondary) / 0.20)
+  );
 }
-.dashboard-bg table thead th {
+table thead th {
   color: hsl(var(--foreground));
   font-weight: 600;
-  border-bottom: 2px solid hsl(var(--primary) / 0.3);
+  border-bottom: 2px solid hsl(var(--primary) / 0.35);
 }
-.dashboard-bg table tbody tr {
+table tbody tr {
   transition: background-color 0.2s ease;
 }
-.dashboard-bg table tbody tr:nth-child(even) {
-  background-color: hsl(var(--accent) / 0.04);
+table tbody tr:nth-child(even) {
+  background-color: hsl(var(--accent) / 0.05);
 }
-.dashboard-bg table tbody tr:hover {
-  background-color: hsl(var(--primary) / 0.08) !important;
+table tbody tr:hover {
+  background-color: hsl(var(--primary) / 0.10) !important;
 }
-.dashboard-bg table tbody td {
+table tbody td {
   border-bottom-color: hsl(var(--border) / 0.6);
 }
